@@ -1,0 +1,63 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libudis86", "udis86-1.7.2\BuildVS2010\libudis86.vcxproj", "{D5C34A21-7218-4A08-9578-1EBB35280A42}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "x86utils", "x86utils\x86utils.vcxproj", "{B1A3D469-2880-42BD-B93B-9DB834A8B470}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D5C34A21-7218-4A08-9578-1EBB35280A42} = {D5C34A21-7218-4A08-9578-1EBB35280A42}
+		{29FE7874-1256-4AD6-B889-68E399DC9608} = {29FE7874-1256-4AD6-B889-68E399DC9608}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libyasm", "yasm-1.3.0\Mkfiles\vc10\libyasm\libyasm.vcxproj", "{29FE7874-1256-4AD6-B889-68E399DC9608}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F0E8B707-00C5-4FF2-B8EF-7C39817132A0} = {F0E8B707-00C5-4FF2-B8EF-7C39817132A0}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "genmodule", "yasm-1.3.0\Mkfiles\vc10\genmodule\genmodule.vcxproj", "{F0E8B707-00C5-4FF2-B8EF-7C39817132A0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
+		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D5C34A21-7218-4A08-9578-1EBB35280A42}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D5C34A21-7218-4A08-9578-1EBB35280A42}.Debug|Win32.Build.0 = Debug|Win32
+		{D5C34A21-7218-4A08-9578-1EBB35280A42}.Debug|x64.ActiveCfg = Debug|x64
+		{D5C34A21-7218-4A08-9578-1EBB35280A42}.Debug|x64.Build.0 = Debug|x64
+		{D5C34A21-7218-4A08-9578-1EBB35280A42}.Release|Win32.ActiveCfg = Release|Win32
+		{D5C34A21-7218-4A08-9578-1EBB35280A42}.Release|Win32.Build.0 = Release|Win32
+		{D5C34A21-7218-4A08-9578-1EBB35280A42}.Release|x64.ActiveCfg = Release|x64
+		{D5C34A21-7218-4A08-9578-1EBB35280A42}.Release|x64.Build.0 = Release|x64
+		{B1A3D469-2880-42BD-B93B-9DB834A8B470}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B1A3D469-2880-42BD-B93B-9DB834A8B470}.Debug|Win32.Build.0 = Debug|Win32
+		{B1A3D469-2880-42BD-B93B-9DB834A8B470}.Debug|x64.ActiveCfg = Debug|x64
+		{B1A3D469-2880-42BD-B93B-9DB834A8B470}.Debug|x64.Build.0 = Debug|x64
+		{B1A3D469-2880-42BD-B93B-9DB834A8B470}.Release|Win32.ActiveCfg = Release|Win32
+		{B1A3D469-2880-42BD-B93B-9DB834A8B470}.Release|Win32.Build.0 = Release|Win32
+		{B1A3D469-2880-42BD-B93B-9DB834A8B470}.Release|x64.ActiveCfg = Release|x64
+		{B1A3D469-2880-42BD-B93B-9DB834A8B470}.Release|x64.Build.0 = Release|x64
+		{29FE7874-1256-4AD6-B889-68E399DC9608}.Debug|Win32.ActiveCfg = Debug|Win32
+		{29FE7874-1256-4AD6-B889-68E399DC9608}.Debug|Win32.Build.0 = Debug|Win32
+		{29FE7874-1256-4AD6-B889-68E399DC9608}.Debug|x64.ActiveCfg = Debug|x64
+		{29FE7874-1256-4AD6-B889-68E399DC9608}.Debug|x64.Build.0 = Debug|x64
+		{29FE7874-1256-4AD6-B889-68E399DC9608}.Release|Win32.ActiveCfg = Release|Win32
+		{29FE7874-1256-4AD6-B889-68E399DC9608}.Release|Win32.Build.0 = Release|Win32
+		{29FE7874-1256-4AD6-B889-68E399DC9608}.Release|x64.ActiveCfg = Release|x64
+		{29FE7874-1256-4AD6-B889-68E399DC9608}.Release|x64.Build.0 = Release|x64
+		{F0E8B707-00C5-4FF2-B8EF-7C39817132A0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F0E8B707-00C5-4FF2-B8EF-7C39817132A0}.Debug|Win32.Build.0 = Debug|Win32
+		{F0E8B707-00C5-4FF2-B8EF-7C39817132A0}.Debug|x64.ActiveCfg = Debug|Win32
+		{F0E8B707-00C5-4FF2-B8EF-7C39817132A0}.Debug|x64.Build.0 = Debug|Win32
+		{F0E8B707-00C5-4FF2-B8EF-7C39817132A0}.Release|Win32.ActiveCfg = Release|Win32
+		{F0E8B707-00C5-4FF2-B8EF-7C39817132A0}.Release|Win32.Build.0 = Release|Win32
+		{F0E8B707-00C5-4FF2-B8EF-7C39817132A0}.Release|x64.ActiveCfg = Release|Win32
+		{F0E8B707-00C5-4FF2-B8EF-7C39817132A0}.Release|x64.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

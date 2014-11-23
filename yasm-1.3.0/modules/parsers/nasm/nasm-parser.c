@@ -89,6 +89,7 @@ nasm_parser_do_parse(yasm_object *object, yasm_preproc *pp,
 static const char *nasm_parser_preproc_keywords[] = {
     "raw",
     "nasm",
+    "str",
     NULL
 };
 
@@ -121,6 +122,7 @@ tasm_parser_do_parse(yasm_object *object, yasm_preproc *pp,
 static const char *tasm_parser_preproc_keywords[] = {
     "raw",
     "tasm",
+    "str",
     NULL
 };
 

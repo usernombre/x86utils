@@ -181,6 +181,7 @@ DIST_COMMON = $(srcdir)/tools/Makefile.inc \
 	$(srcdir)/modules/preprocs/cpp/Makefile.inc \
 	$(srcdir)/modules/preprocs/gas/Makefile.inc \
 	$(srcdir)/modules/preprocs/gas/tests/Makefile.inc \
+	$(srcdir)/modules/preprocs/str/Makefile.inc \a
 	$(srcdir)/modules/dbgfmts/Makefile.inc \
 	$(srcdir)/modules/dbgfmts/codeview/Makefile.inc \
 	$(srcdir)/modules/dbgfmts/dwarf2/Makefile.inc \
@@ -222,6 +223,7 @@ DIST_COMMON = $(srcdir)/tools/Makefile.inc \
 	$(srcdir)/modules/objfmts/win64/tests/gas/Makefile.inc \
 	$(srcdir)/modules/objfmts/xdf/Makefile.inc \
 	$(srcdir)/modules/objfmts/xdf/tests/Makefile.inc \
+	$(srcdir)/modules/objfmts/mem/Makefile.inc \
 	$(srcdir)/libyasm/Makefile.inc \
 	$(srcdir)/libyasm/tests/Makefile.inc \
 	$(srcdir)/frontends/Makefile.inc \
@@ -326,6 +328,7 @@ am_libyasm_a_OBJECTS = modules/arch/x86/x86arch.$(OBJEXT) \
 	modules/preprocs/cpp/cpp-preproc.$(OBJEXT) \
 	modules/preprocs/gas/gas-preproc.$(OBJEXT) \
 	modules/preprocs/gas/gas-eval.$(OBJEXT) \
+	modules/preprocs/str/str-preproc.$(OBJEXT) \
 	modules/dbgfmts/codeview/cv-dbgfmt.$(OBJEXT) \
 	modules/dbgfmts/codeview/cv-symline.$(OBJEXT) \
 	modules/dbgfmts/codeview/cv-type.$(OBJEXT) \
@@ -347,6 +350,7 @@ am_libyasm_a_OBJECTS = modules/arch/x86/x86arch.$(OBJEXT) \
 	modules/objfmts/macho/macho-objfmt.$(OBJEXT) \
 	modules/objfmts/rdf/rdf-objfmt.$(OBJEXT) \
 	modules/objfmts/xdf/xdf-objfmt.$(OBJEXT) \
+	modules/objfmts/mem/mem-objfmt.$(OBJEXT) \
 	libyasm/assocdat.$(OBJEXT) libyasm/bitvect.$(OBJEXT) \
 	libyasm/bc-align.$(OBJEXT) libyasm/bc-data.$(OBJEXT) \
 	libyasm/bc-incbin.$(OBJEXT) libyasm/bc-org.$(OBJEXT) \
@@ -1442,6 +1446,7 @@ EXTRA_DIST = config/config.rpath tools/Makefile.inc \
 	modules/preprocs/raw/Makefile.inc \
 	modules/preprocs/cpp/Makefile.inc \
 	modules/preprocs/gas/Makefile.inc \
+	modules/preprocs/str/Makefile.inc \
 	modules/preprocs/tasm/tests/Makefile.inc \
 	modules/preprocs/tasm/tests/tasmpp_test.sh \
 	modules/preprocs/tasm/tests/tasm-assume-comment.asm \
@@ -1518,6 +1523,7 @@ EXTRA_DIST = config/config.rpath tools/Makefile.inc \
 	modules/objfmts/win32/Makefile.inc \
 	modules/objfmts/win64/Makefile.inc \
 	modules/objfmts/xdf/Makefile.inc \
+	modules/objfmts/mem/Makefile.inc \
 	modules/objfmts/bin/tests/Makefile.inc \
 	modules/objfmts/bin/tests/bin_test.sh \
 	modules/objfmts/bin/tests/abs.asm \
@@ -1927,6 +1933,7 @@ EXTRA_DIST = config/config.rpath tools/Makefile.inc \
 	modules/objfmts/macho/CMakeLists.txt \
 	modules/objfmts/rdf/CMakeLists.txt \
 	modules/objfmts/xdf/CMakeLists.txt \
+	modules/objfmts/mem/CMakeLists.txt \
 	modules/parsers/CMakeLists.txt \
 	modules/parsers/gas/CMakeLists.txt \
 	modules/parsers/nasm/CMakeLists.txt \
@@ -1934,7 +1941,8 @@ EXTRA_DIST = config/config.rpath tools/Makefile.inc \
 	modules/preprocs/cpp/CMakeLists.txt \
 	modules/preprocs/gas/CMakeLists.txt \
 	modules/preprocs/nasm/CMakeLists.txt \
-	modules/preprocs/raw/CMakeLists.txt plugins/README \
+	modules/preprocs/raw/CMakeLists.txt \
+	modules/preprocs/str/CMakeLists.txt plugins/README \
 	plugins/dbg/CMakeLists.txt plugins/dbg/dbg-objfmt.c \
 	plugins/dbg/init_plugin.c plugins/dbg/README \
 	plugins/x86/CMakeLists.txt plugins/x86/init_plugin.c \
@@ -2026,11 +2034,11 @@ PYBINDING_DEPS = tools/python-yasm/bytecode.pxi \
 	tools/python-yasm/symrec.pxi tools/python-yasm/value.pxi
 YASM_MODULES = arch_x86 arch_lc3b listfmt_nasm parser_gas parser_gnu \
 	parser_nasm parser_tasm preproc_nasm preproc_tasm preproc_raw \
-	preproc_cpp preproc_gas dbgfmt_cv8 dbgfmt_dwarf2 dbgfmt_null \
+	preproc_cpp preproc_gas preproc_str dbgfmt_cv8 dbgfmt_dwarf2 dbgfmt_null \
 	dbgfmt_stabs objfmt_dbg objfmt_bin objfmt_dosexe objfmt_elf \
 	objfmt_elf32 objfmt_elf64 objfmt_elfx32 objfmt_coff \
 	objfmt_macho objfmt_macho32 objfmt_macho64 objfmt_rdf \
-	objfmt_win32 objfmt_win64 objfmt_x64 objfmt_xdf
+	objfmt_win32 objfmt_win64 objfmt_x64 objfmt_xdf objfmt_mem
 lib_LIBRARIES = libyasm.a
 libyasm_a_SOURCES = modules/arch/x86/x86arch.c \
 	modules/arch/x86/x86arch.h modules/arch/x86/x86bc.c \
@@ -2058,6 +2066,7 @@ libyasm_a_SOURCES = modules/arch/x86/x86arch.c \
 	modules/preprocs/gas/gas-preproc.c \
 	modules/preprocs/gas/gas-eval.h \
 	modules/preprocs/gas/gas-eval.c \
+	modules/preprocs/str/str-preproc.c \
 	modules/dbgfmts/codeview/cv-dbgfmt.h \
 	modules/dbgfmts/codeview/cv-dbgfmt.c \
 	modules/dbgfmts/codeview/cv-symline.c \
@@ -2081,7 +2090,8 @@ libyasm_a_SOURCES = modules/arch/x86/x86arch.c \
 	modules/objfmts/coff/win64-except.c \
 	modules/objfmts/macho/macho-objfmt.c \
 	modules/objfmts/rdf/rdf-objfmt.c \
-	modules/objfmts/xdf/xdf-objfmt.c libyasm/assocdat.c \
+	modules/objfmts/xdf/xdf-objfmt.c \
+	modules/objfmts/mem/mem-objfmt.c libyasm/assocdat.c \
 	libyasm/bitvect.c libyasm/bc-align.c libyasm/bc-data.c \
 	libyasm/bc-incbin.c libyasm/bc-org.c libyasm/bc-reserve.c \
 	libyasm/bytecode.c libyasm/errwarn.c libyasm/expr.c \
@@ -2143,7 +2153,7 @@ all: $(BUILT_SOURCES) config.h
 .SUFFIXES: .gperf .c .log .o .obj .test .test$(EXEEXT) .trs
 am--refresh: Makefile
 	@:
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/tools/Makefile.inc $(srcdir)/tools/re2c/Makefile.inc $(srcdir)/tools/genmacro/Makefile.inc $(srcdir)/tools/genperf/Makefile.inc $(srcdir)/tools/python-yasm/Makefile.inc $(srcdir)/tools/python-yasm/tests/Makefile.inc $(srcdir)/modules/Makefile.inc $(srcdir)/modules/arch/Makefile.inc $(srcdir)/modules/arch/x86/Makefile.inc $(srcdir)/modules/arch/x86/tests/Makefile.inc $(srcdir)/modules/arch/x86/tests/gas32/Makefile.inc $(srcdir)/modules/arch/x86/tests/gas64/Makefile.inc $(srcdir)/modules/arch/lc3b/Makefile.inc $(srcdir)/modules/arch/lc3b/tests/Makefile.inc $(srcdir)/modules/listfmts/Makefile.inc $(srcdir)/modules/listfmts/nasm/Makefile.inc $(srcdir)/modules/parsers/Makefile.inc $(srcdir)/modules/parsers/gas/Makefile.inc $(srcdir)/modules/parsers/gas/tests/Makefile.inc $(srcdir)/modules/parsers/gas/tests/bin/Makefile.inc $(srcdir)/modules/parsers/nasm/Makefile.inc $(srcdir)/modules/parsers/nasm/tests/Makefile.inc $(srcdir)/modules/parsers/nasm/tests/worphan/Makefile.inc $(srcdir)/modules/parsers/tasm/Makefile.inc $(srcdir)/modules/parsers/tasm/tests/Makefile.inc $(srcdir)/modules/parsers/tasm/tests/exe/Makefile.inc $(srcdir)/modules/preprocs/Makefile.inc $(srcdir)/modules/preprocs/tasm/Makefile.inc $(srcdir)/modules/preprocs/tasm/tests/Makefile.inc $(srcdir)/modules/preprocs/nasm/Makefile.inc $(srcdir)/modules/preprocs/nasm/tests/Makefile.inc $(srcdir)/modules/preprocs/raw/Makefile.inc $(srcdir)/modules/preprocs/raw/tests/Makefile.inc $(srcdir)/modules/preprocs/cpp/Makefile.inc $(srcdir)/modules/preprocs/gas/Makefile.inc $(srcdir)/modules/preprocs/gas/tests/Makefile.inc $(srcdir)/modules/dbgfmts/Makefile.inc $(srcdir)/modules/dbgfmts/codeview/Makefile.inc $(srcdir)/modules/dbgfmts/dwarf2/Makefile.inc $(srcdir)/modules/dbgfmts/dwarf2/tests/Makefile.inc $(srcdir)/modules/dbgfmts/dwarf2/tests/gen64/Makefile.inc $(srcdir)/modules/dbgfmts/dwarf2/tests/pass32/Makefile.inc $(srcdir)/modules/dbgfmts/dwarf2/tests/pass64/Makefile.inc $(srcdir)/modules/dbgfmts/dwarf2/tests/passwin64/Makefile.inc $(srcdir)/modules/dbgfmts/null/Makefile.inc $(srcdir)/modules/dbgfmts/stabs/Makefile.inc $(srcdir)/modules/dbgfmts/stabs/tests/Makefile.inc $(srcdir)/modules/objfmts/Makefile.inc $(srcdir)/modules/objfmts/dbg/Makefile.inc $(srcdir)/modules/objfmts/bin/Makefile.inc $(srcdir)/modules/objfmts/bin/tests/Makefile.inc $(srcdir)/modules/objfmts/bin/tests/multisect/Makefile.inc $(srcdir)/modules/objfmts/elf/Makefile.inc $(srcdir)/modules/objfmts/elf/tests/Makefile.inc $(srcdir)/modules/objfmts/elf/tests/amd64/Makefile.inc $(srcdir)/modules/objfmts/elf/tests/x32/Makefile.inc $(srcdir)/modules/objfmts/elf/tests/gas32/Makefile.inc $(srcdir)/modules/objfmts/elf/tests/gas64/Makefile.inc $(srcdir)/modules/objfmts/elf/tests/gasx32/Makefile.inc $(srcdir)/modules/objfmts/coff/Makefile.inc $(srcdir)/modules/objfmts/coff/tests/Makefile.inc $(srcdir)/modules/objfmts/macho/Makefile.inc $(srcdir)/modules/objfmts/macho/tests/Makefile.inc $(srcdir)/modules/objfmts/macho/tests/gas32/Makefile.inc $(srcdir)/modules/objfmts/macho/tests/gas64/Makefile.inc $(srcdir)/modules/objfmts/macho/tests/nasm32/Makefile.inc $(srcdir)/modules/objfmts/macho/tests/nasm64/Makefile.inc $(srcdir)/modules/objfmts/rdf/Makefile.inc $(srcdir)/modules/objfmts/rdf/tests/Makefile.inc $(srcdir)/modules/objfmts/win32/Makefile.inc $(srcdir)/modules/objfmts/win32/tests/Makefile.inc $(srcdir)/modules/objfmts/win32/tests/gas/Makefile.inc $(srcdir)/modules/objfmts/win64/Makefile.inc $(srcdir)/modules/objfmts/win64/tests/Makefile.inc $(srcdir)/modules/objfmts/win64/tests/gas/Makefile.inc $(srcdir)/modules/objfmts/xdf/Makefile.inc $(srcdir)/modules/objfmts/xdf/tests/Makefile.inc $(srcdir)/libyasm/Makefile.inc $(srcdir)/libyasm/tests/Makefile.inc $(srcdir)/frontends/Makefile.inc $(srcdir)/frontends/yasm/Makefile.inc $(srcdir)/frontends/tasm/Makefile.inc $(srcdir)/frontends/vsyasm/Makefile.inc $(srcdir)/m4/Makefile.inc $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/tools/Makefile.inc $(srcdir)/tools/re2c/Makefile.inc $(srcdir)/tools/genmacro/Makefile.inc $(srcdir)/tools/genperf/Makefile.inc $(srcdir)/tools/python-yasm/Makefile.inc $(srcdir)/tools/python-yasm/tests/Makefile.inc $(srcdir)/modules/Makefile.inc $(srcdir)/modules/arch/Makefile.inc $(srcdir)/modules/arch/x86/Makefile.inc $(srcdir)/modules/arch/x86/tests/Makefile.inc $(srcdir)/modules/arch/x86/tests/gas32/Makefile.inc $(srcdir)/modules/arch/x86/tests/gas64/Makefile.inc $(srcdir)/modules/arch/lc3b/Makefile.inc $(srcdir)/modules/arch/lc3b/tests/Makefile.inc $(srcdir)/modules/listfmts/Makefile.inc $(srcdir)/modules/listfmts/nasm/Makefile.inc $(srcdir)/modules/parsers/Makefile.inc $(srcdir)/modules/parsers/gas/Makefile.inc $(srcdir)/modules/parsers/gas/tests/Makefile.inc $(srcdir)/modules/parsers/gas/tests/bin/Makefile.inc $(srcdir)/modules/parsers/nasm/Makefile.inc $(srcdir)/modules/parsers/nasm/tests/Makefile.inc $(srcdir)/modules/parsers/nasm/tests/worphan/Makefile.inc $(srcdir)/modules/parsers/tasm/Makefile.inc $(srcdir)/modules/parsers/tasm/tests/Makefile.inc $(srcdir)/modules/parsers/tasm/tests/exe/Makefile.inc $(srcdir)/modules/preprocs/Makefile.inc $(srcdir)/modules/preprocs/tasm/Makefile.inc $(srcdir)/modules/preprocs/tasm/tests/Makefile.inc $(srcdir)/modules/preprocs/nasm/Makefile.inc $(srcdir)/modules/preprocs/nasm/tests/Makefile.inc $(srcdir)/modules/preprocs/raw/Makefile.inc $(srcdir)/modules/preprocs/raw/tests/Makefile.inc $(srcdir)/modules/preprocs/cpp/Makefile.inc $(srcdir)/modules/preprocs/gas/Makefile.inc $(srcdir)/modules/preprocs/gas/tests/Makefile.inc $(srcdir)/modules/preprocs/str/Makefile.inc $(srcdir)/modules/dbgfmts/Makefile.inc $(srcdir)/modules/dbgfmts/codeview/Makefile.inc $(srcdir)/modules/dbgfmts/dwarf2/Makefile.inc $(srcdir)/modules/dbgfmts/dwarf2/tests/Makefile.inc $(srcdir)/modules/dbgfmts/dwarf2/tests/gen64/Makefile.inc $(srcdir)/modules/dbgfmts/dwarf2/tests/pass32/Makefile.inc $(srcdir)/modules/dbgfmts/dwarf2/tests/pass64/Makefile.inc $(srcdir)/modules/dbgfmts/dwarf2/tests/passwin64/Makefile.inc $(srcdir)/modules/dbgfmts/null/Makefile.inc $(srcdir)/modules/dbgfmts/stabs/Makefile.inc $(srcdir)/modules/dbgfmts/stabs/tests/Makefile.inc $(srcdir)/modules/objfmts/Makefile.inc $(srcdir)/modules/objfmts/dbg/Makefile.inc $(srcdir)/modules/objfmts/bin/Makefile.inc $(srcdir)/modules/objfmts/bin/tests/Makefile.inc $(srcdir)/modules/objfmts/bin/tests/multisect/Makefile.inc $(srcdir)/modules/objfmts/elf/Makefile.inc $(srcdir)/modules/objfmts/elf/tests/Makefile.inc $(srcdir)/modules/objfmts/elf/tests/amd64/Makefile.inc $(srcdir)/modules/objfmts/elf/tests/x32/Makefile.inc $(srcdir)/modules/objfmts/elf/tests/gas32/Makefile.inc $(srcdir)/modules/objfmts/elf/tests/gas64/Makefile.inc $(srcdir)/modules/objfmts/elf/tests/gasx32/Makefile.inc $(srcdir)/modules/objfmts/coff/Makefile.inc $(srcdir)/modules/objfmts/coff/tests/Makefile.inc $(srcdir)/modules/objfmts/macho/Makefile.inc $(srcdir)/modules/objfmts/macho/tests/Makefile.inc $(srcdir)/modules/objfmts/macho/tests/gas32/Makefile.inc $(srcdir)/modules/objfmts/macho/tests/gas64/Makefile.inc $(srcdir)/modules/objfmts/macho/tests/nasm32/Makefile.inc $(srcdir)/modules/objfmts/macho/tests/nasm64/Makefile.inc $(srcdir)/modules/objfmts/rdf/Makefile.inc $(srcdir)/modules/objfmts/rdf/tests/Makefile.inc $(srcdir)/modules/objfmts/win32/Makefile.inc $(srcdir)/modules/objfmts/win32/tests/Makefile.inc $(srcdir)/modules/objfmts/win32/tests/gas/Makefile.inc $(srcdir)/modules/objfmts/win64/Makefile.inc $(srcdir)/modules/objfmts/win64/tests/Makefile.inc $(srcdir)/modules/objfmts/win64/tests/gas/Makefile.inc $(srcdir)/modules/objfmts/xdf/Makefile.inc $(srcdir)/modules/objfmts/xdf/tests/Makefile.inc $(srcdir)/modules/objfmts/mem/Makefile.inc $(srcdir)/libyasm/Makefile.inc $(srcdir)/libyasm/tests/Makefile.inc $(srcdir)/frontends/Makefile.inc $(srcdir)/frontends/yasm/Makefile.inc $(srcdir)/frontends/tasm/Makefile.inc $(srcdir)/frontends/vsyasm/Makefile.inc $(srcdir)/m4/Makefile.inc $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -2166,7 +2176,7 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe)'; \
 	    cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe);; \
 	esac;
-$(srcdir)/tools/Makefile.inc $(srcdir)/tools/re2c/Makefile.inc $(srcdir)/tools/genmacro/Makefile.inc $(srcdir)/tools/genperf/Makefile.inc $(srcdir)/tools/python-yasm/Makefile.inc $(srcdir)/tools/python-yasm/tests/Makefile.inc $(srcdir)/modules/Makefile.inc $(srcdir)/modules/arch/Makefile.inc $(srcdir)/modules/arch/x86/Makefile.inc $(srcdir)/modules/arch/x86/tests/Makefile.inc $(srcdir)/modules/arch/x86/tests/gas32/Makefile.inc $(srcdir)/modules/arch/x86/tests/gas64/Makefile.inc $(srcdir)/modules/arch/lc3b/Makefile.inc $(srcdir)/modules/arch/lc3b/tests/Makefile.inc $(srcdir)/modules/listfmts/Makefile.inc $(srcdir)/modules/listfmts/nasm/Makefile.inc $(srcdir)/modules/parsers/Makefile.inc $(srcdir)/modules/parsers/gas/Makefile.inc $(srcdir)/modules/parsers/gas/tests/Makefile.inc $(srcdir)/modules/parsers/gas/tests/bin/Makefile.inc $(srcdir)/modules/parsers/nasm/Makefile.inc $(srcdir)/modules/parsers/nasm/tests/Makefile.inc $(srcdir)/modules/parsers/nasm/tests/worphan/Makefile.inc $(srcdir)/modules/parsers/tasm/Makefile.inc $(srcdir)/modules/parsers/tasm/tests/Makefile.inc $(srcdir)/modules/parsers/tasm/tests/exe/Makefile.inc $(srcdir)/modules/preprocs/Makefile.inc $(srcdir)/modules/preprocs/tasm/Makefile.inc $(srcdir)/modules/preprocs/tasm/tests/Makefile.inc $(srcdir)/modules/preprocs/nasm/Makefile.inc $(srcdir)/modules/preprocs/nasm/tests/Makefile.inc $(srcdir)/modules/preprocs/raw/Makefile.inc $(srcdir)/modules/preprocs/raw/tests/Makefile.inc $(srcdir)/modules/preprocs/cpp/Makefile.inc $(srcdir)/modules/preprocs/gas/Makefile.inc $(srcdir)/modules/preprocs/gas/tests/Makefile.inc $(srcdir)/modules/dbgfmts/Makefile.inc $(srcdir)/modules/dbgfmts/codeview/Makefile.inc $(srcdir)/modules/dbgfmts/dwarf2/Makefile.inc $(srcdir)/modules/dbgfmts/dwarf2/tests/Makefile.inc $(srcdir)/modules/dbgfmts/dwarf2/tests/gen64/Makefile.inc $(srcdir)/modules/dbgfmts/dwarf2/tests/pass32/Makefile.inc $(srcdir)/modules/dbgfmts/dwarf2/tests/pass64/Makefile.inc $(srcdir)/modules/dbgfmts/dwarf2/tests/passwin64/Makefile.inc $(srcdir)/modules/dbgfmts/null/Makefile.inc $(srcdir)/modules/dbgfmts/stabs/Makefile.inc $(srcdir)/modules/dbgfmts/stabs/tests/Makefile.inc $(srcdir)/modules/objfmts/Makefile.inc $(srcdir)/modules/objfmts/dbg/Makefile.inc $(srcdir)/modules/objfmts/bin/Makefile.inc $(srcdir)/modules/objfmts/bin/tests/Makefile.inc $(srcdir)/modules/objfmts/bin/tests/multisect/Makefile.inc $(srcdir)/modules/objfmts/elf/Makefile.inc $(srcdir)/modules/objfmts/elf/tests/Makefile.inc $(srcdir)/modules/objfmts/elf/tests/amd64/Makefile.inc $(srcdir)/modules/objfmts/elf/tests/x32/Makefile.inc $(srcdir)/modules/objfmts/elf/tests/gas32/Makefile.inc $(srcdir)/modules/objfmts/elf/tests/gas64/Makefile.inc $(srcdir)/modules/objfmts/elf/tests/gasx32/Makefile.inc $(srcdir)/modules/objfmts/coff/Makefile.inc $(srcdir)/modules/objfmts/coff/tests/Makefile.inc $(srcdir)/modules/objfmts/macho/Makefile.inc $(srcdir)/modules/objfmts/macho/tests/Makefile.inc $(srcdir)/modules/objfmts/macho/tests/gas32/Makefile.inc $(srcdir)/modules/objfmts/macho/tests/gas64/Makefile.inc $(srcdir)/modules/objfmts/macho/tests/nasm32/Makefile.inc $(srcdir)/modules/objfmts/macho/tests/nasm64/Makefile.inc $(srcdir)/modules/objfmts/rdf/Makefile.inc $(srcdir)/modules/objfmts/rdf/tests/Makefile.inc $(srcdir)/modules/objfmts/win32/Makefile.inc $(srcdir)/modules/objfmts/win32/tests/Makefile.inc $(srcdir)/modules/objfmts/win32/tests/gas/Makefile.inc $(srcdir)/modules/objfmts/win64/Makefile.inc $(srcdir)/modules/objfmts/win64/tests/Makefile.inc $(srcdir)/modules/objfmts/win64/tests/gas/Makefile.inc $(srcdir)/modules/objfmts/xdf/Makefile.inc $(srcdir)/modules/objfmts/xdf/tests/Makefile.inc $(srcdir)/libyasm/Makefile.inc $(srcdir)/libyasm/tests/Makefile.inc $(srcdir)/frontends/Makefile.inc $(srcdir)/frontends/yasm/Makefile.inc $(srcdir)/frontends/tasm/Makefile.inc $(srcdir)/frontends/vsyasm/Makefile.inc $(srcdir)/m4/Makefile.inc:
+$(srcdir)/tools/Makefile.inc $(srcdir)/tools/re2c/Makefile.inc $(srcdir)/tools/genmacro/Makefile.inc $(srcdir)/tools/genperf/Makefile.inc $(srcdir)/tools/python-yasm/Makefile.inc $(srcdir)/tools/python-yasm/tests/Makefile.inc $(srcdir)/modules/Makefile.inc $(srcdir)/modules/arch/Makefile.inc $(srcdir)/modules/arch/x86/Makefile.inc $(srcdir)/modules/arch/x86/tests/Makefile.inc $(srcdir)/modules/arch/x86/tests/gas32/Makefile.inc $(srcdir)/modules/arch/x86/tests/gas64/Makefile.inc $(srcdir)/modules/arch/lc3b/Makefile.inc $(srcdir)/modules/arch/lc3b/tests/Makefile.inc $(srcdir)/modules/listfmts/Makefile.inc $(srcdir)/modules/listfmts/nasm/Makefile.inc $(srcdir)/modules/parsers/Makefile.inc $(srcdir)/modules/parsers/gas/Makefile.inc $(srcdir)/modules/parsers/gas/tests/Makefile.inc $(srcdir)/modules/parsers/gas/tests/bin/Makefile.inc $(srcdir)/modules/parsers/nasm/Makefile.inc $(srcdir)/modules/parsers/nasm/tests/Makefile.inc $(srcdir)/modules/parsers/nasm/tests/worphan/Makefile.inc $(srcdir)/modules/parsers/tasm/Makefile.inc $(srcdir)/modules/parsers/tasm/tests/Makefile.inc $(srcdir)/modules/parsers/tasm/tests/exe/Makefile.inc $(srcdir)/modules/preprocs/Makefile.inc $(srcdir)/modules/preprocs/tasm/Makefile.inc $(srcdir)/modules/preprocs/tasm/tests/Makefile.inc $(srcdir)/modules/preprocs/nasm/Makefile.inc $(srcdir)/modules/preprocs/nasm/tests/Makefile.inc $(srcdir)/modules/preprocs/raw/Makefile.inc $(srcdir)/modules/preprocs/raw/tests/Makefile.inc $(srcdir)/modules/preprocs/cpp/Makefile.inc $(srcdir)/modules/preprocs/gas/Makefile.inc $(srcdir)/modules/preprocs/gas/tests/Makefile.inc $(srcdir)/modules/preprocs/str/Makefile.inc $(srcdir)/modules/dbgfmts/Makefile.inc $(srcdir)/modules/dbgfmts/codeview/Makefile.inc $(srcdir)/modules/dbgfmts/dwarf2/Makefile.inc $(srcdir)/modules/dbgfmts/dwarf2/tests/Makefile.inc $(srcdir)/modules/dbgfmts/dwarf2/tests/gen64/Makefile.inc $(srcdir)/modules/dbgfmts/dwarf2/tests/pass32/Makefile.inc $(srcdir)/modules/dbgfmts/dwarf2/tests/pass64/Makefile.inc $(srcdir)/modules/dbgfmts/dwarf2/tests/passwin64/Makefile.inc $(srcdir)/modules/dbgfmts/null/Makefile.inc $(srcdir)/modules/dbgfmts/stabs/Makefile.inc $(srcdir)/modules/dbgfmts/stabs/tests/Makefile.inc $(srcdir)/modules/objfmts/Makefile.inc $(srcdir)/modules/objfmts/dbg/Makefile.inc $(srcdir)/modules/objfmts/bin/Makefile.inc $(srcdir)/modules/objfmts/bin/tests/Makefile.inc $(srcdir)/modules/objfmts/bin/tests/multisect/Makefile.inc $(srcdir)/modules/objfmts/elf/Makefile.inc $(srcdir)/modules/objfmts/elf/tests/Makefile.inc $(srcdir)/modules/objfmts/elf/tests/amd64/Makefile.inc $(srcdir)/modules/objfmts/elf/tests/x32/Makefile.inc $(srcdir)/modules/objfmts/elf/tests/gas32/Makefile.inc $(srcdir)/modules/objfmts/elf/tests/gas64/Makefile.inc $(srcdir)/modules/objfmts/elf/tests/gasx32/Makefile.inc $(srcdir)/modules/objfmts/coff/Makefile.inc $(srcdir)/modules/objfmts/coff/tests/Makefile.inc $(srcdir)/modules/objfmts/macho/Makefile.inc $(srcdir)/modules/objfmts/macho/tests/Makefile.inc $(srcdir)/modules/objfmts/macho/tests/gas32/Makefile.inc $(srcdir)/modules/objfmts/macho/tests/gas64/Makefile.inc $(srcdir)/modules/objfmts/macho/tests/nasm32/Makefile.inc $(srcdir)/modules/objfmts/macho/tests/nasm64/Makefile.inc $(srcdir)/modules/objfmts/rdf/Makefile.inc $(srcdir)/modules/objfmts/rdf/tests/Makefile.inc $(srcdir)/modules/objfmts/win32/Makefile.inc $(srcdir)/modules/objfmts/win32/tests/Makefile.inc $(srcdir)/modules/objfmts/win32/tests/gas/Makefile.inc $(srcdir)/modules/objfmts/win64/Makefile.inc $(srcdir)/modules/objfmts/win64/tests/Makefile.inc $(srcdir)/modules/objfmts/win64/tests/gas/Makefile.inc $(srcdir)/modules/objfmts/xdf/Makefile.inc $(srcdir)/modules/objfmts/xdf/tests/Makefile.inc $(srcdir)/modules/objfmts/mem/Makefile.inc $(srcdir)/libyasm/Makefile.inc $(srcdir)/libyasm/tests/Makefile.inc $(srcdir)/frontends/Makefile.inc $(srcdir)/frontends/yasm/Makefile.inc $(srcdir)/frontends/tasm/Makefile.inc $(srcdir)/frontends/vsyasm/Makefile.inc $(srcdir)/m4/Makefile.inc:
 
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
@@ -2331,6 +2341,15 @@ modules/preprocs/gas/gas-preproc.$(OBJEXT):  \
 modules/preprocs/gas/gas-eval.$(OBJEXT):  \
 	modules/preprocs/gas/$(am__dirstamp) \
 	modules/preprocs/gas/$(DEPDIR)/$(am__dirstamp)
+modules/preprocs/str/$(am__dirstamp):
+	@$(MKDIR_P) modules/preprocs/str
+	@: > modules/preprocs/str/$(am__dirstamp)
+modules/preprocs/str/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) modules/preprocs/str/$(DEPDIR)
+	@: > modules/preprocs/str/$(DEPDIR)/$(am__dirstamp)
+modules/preprocs/str/str-preproc.$(OBJEXT):  \
+	modules/preprocs/str/$(am__dirstamp) \
+	modules/preprocs/str/$(DEPDIR)/$(am__dirstamp)
 modules/dbgfmts/codeview/$(am__dirstamp):
 	@$(MKDIR_P) modules/dbgfmts/codeview
 	@: > modules/dbgfmts/codeview/$(am__dirstamp)
@@ -2460,6 +2479,15 @@ modules/objfmts/xdf/$(DEPDIR)/$(am__dirstamp):
 modules/objfmts/xdf/xdf-objfmt.$(OBJEXT):  \
 	modules/objfmts/xdf/$(am__dirstamp) \
 	modules/objfmts/xdf/$(DEPDIR)/$(am__dirstamp)
+modules/objfmts/mem/$(am__dirstamp):
+	@$(MKDIR_P) modules/objfmts/mem
+	@: > modules/objfmts/mem/$(am__dirstamp)
+modules/objfmts/mem/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) modules/objfmts/mem/$(DEPDIR)
+	@: > modules/objfmts/mem/$(DEPDIR)/$(am__dirstamp)
+modules/objfmts/mem/mem-objfmt.$(OBJEXT):  \
+	modules/objfmts/mem/$(am__dirstamp) \
+	modules/objfmts/mem/$(DEPDIR)/$(am__dirstamp)
 libyasm/$(am__dirstamp):
 	@$(MKDIR_P) libyasm
 	@: > libyasm/$(am__dirstamp)
@@ -2707,12 +2735,14 @@ mostlyclean-compile:
 	-rm -f modules/objfmts/macho/*.$(OBJEXT)
 	-rm -f modules/objfmts/rdf/*.$(OBJEXT)
 	-rm -f modules/objfmts/xdf/*.$(OBJEXT)
+	-rm -f modules/objfmts/mem/*.$(OBJEXT)
 	-rm -f modules/parsers/gas/*.$(OBJEXT)
 	-rm -f modules/parsers/nasm/*.$(OBJEXT)
 	-rm -f modules/preprocs/cpp/*.$(OBJEXT)
 	-rm -f modules/preprocs/gas/*.$(OBJEXT)
 	-rm -f modules/preprocs/nasm/*.$(OBJEXT)
 	-rm -f modules/preprocs/raw/*.$(OBJEXT)
+	-rm -f modules/preprocs/str/*.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
@@ -2791,6 +2821,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@modules/objfmts/macho/$(DEPDIR)/macho-objfmt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@modules/objfmts/rdf/$(DEPDIR)/rdf-objfmt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@modules/objfmts/xdf/$(DEPDIR)/xdf-objfmt.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@modules/objfmts/mem/$(DEPDIR)/mem-objfmt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@modules/parsers/gas/$(DEPDIR)/gas-parse-intel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@modules/parsers/gas/$(DEPDIR)/gas-parse.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@modules/parsers/gas/$(DEPDIR)/gas-parser.Po@am__quote@
@@ -2804,6 +2835,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@modules/preprocs/nasm/$(DEPDIR)/nasm-preproc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@modules/preprocs/nasm/$(DEPDIR)/nasmlib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@modules/preprocs/raw/$(DEPDIR)/raw-preproc.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@modules/preprocs/str/$(DEPDIR)/str-preproc.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -3891,6 +3923,8 @@ distclean-generic:
 	-rm -f modules/objfmts/rdf/$(am__dirstamp)
 	-rm -f modules/objfmts/xdf/$(DEPDIR)/$(am__dirstamp)
 	-rm -f modules/objfmts/xdf/$(am__dirstamp)
+	-rm -f modules/objfmts/mem/$(DEPDIR)/$(am__dirstamp)
+	-rm -f modules/objfmts/mem/$(am__dirstamp)
 	-rm -f modules/parsers/gas/$(DEPDIR)/$(am__dirstamp)
 	-rm -f modules/parsers/gas/$(am__dirstamp)
 	-rm -f modules/parsers/nasm/$(DEPDIR)/$(am__dirstamp)
@@ -3903,6 +3937,8 @@ distclean-generic:
 	-rm -f modules/preprocs/nasm/$(am__dirstamp)
 	-rm -f modules/preprocs/raw/$(DEPDIR)/$(am__dirstamp)
 	-rm -f modules/preprocs/raw/$(am__dirstamp)
+	-rm -f modules/preprocs/str/$(DEPDIR)/$(am__dirstamp)
+	-rm -f modules/preprocs/str/$(am__dirstamp)
 	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
@@ -3917,7 +3953,7 @@ clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf ./$(DEPDIR) frontends/tasm/$(DEPDIR) frontends/vsyasm/$(DEPDIR) frontends/yasm/$(DEPDIR) libyasm/$(DEPDIR) libyasm/tests/$(DEPDIR) modules/arch/lc3b/$(DEPDIR) modules/arch/x86/$(DEPDIR) modules/dbgfmts/codeview/$(DEPDIR) modules/dbgfmts/dwarf2/$(DEPDIR) modules/dbgfmts/null/$(DEPDIR) modules/dbgfmts/stabs/$(DEPDIR) modules/listfmts/nasm/$(DEPDIR) modules/objfmts/bin/$(DEPDIR) modules/objfmts/coff/$(DEPDIR) modules/objfmts/dbg/$(DEPDIR) modules/objfmts/elf/$(DEPDIR) modules/objfmts/macho/$(DEPDIR) modules/objfmts/rdf/$(DEPDIR) modules/objfmts/xdf/$(DEPDIR) modules/parsers/gas/$(DEPDIR) modules/parsers/nasm/$(DEPDIR) modules/preprocs/cpp/$(DEPDIR) modules/preprocs/gas/$(DEPDIR) modules/preprocs/nasm/$(DEPDIR) modules/preprocs/raw/$(DEPDIR)
+	-rm -rf ./$(DEPDIR) frontends/tasm/$(DEPDIR) frontends/vsyasm/$(DEPDIR) frontends/yasm/$(DEPDIR) libyasm/$(DEPDIR) libyasm/tests/$(DEPDIR) modules/arch/lc3b/$(DEPDIR) modules/arch/x86/$(DEPDIR) modules/dbgfmts/codeview/$(DEPDIR) modules/dbgfmts/dwarf2/$(DEPDIR) modules/dbgfmts/null/$(DEPDIR) modules/dbgfmts/stabs/$(DEPDIR) modules/listfmts/nasm/$(DEPDIR) modules/objfmts/bin/$(DEPDIR) modules/objfmts/coff/$(DEPDIR) modules/objfmts/dbg/$(DEPDIR) modules/objfmts/elf/$(DEPDIR) modules/objfmts/macho/$(DEPDIR) modules/objfmts/rdf/$(DEPDIR) modules/objfmts/xdf/$(DEPDIR) modules/objfmts/mem/$(DEPDIR) modules/parsers/gas/$(DEPDIR) modules/parsers/nasm/$(DEPDIR) modules/preprocs/cpp/$(DEPDIR) modules/preprocs/gas/$(DEPDIR) modules/preprocs/nasm/$(DEPDIR) modules/preprocs/raw/$(DEPDIR) modules/preprocs/str/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-hdr distclean-local distclean-tags
@@ -3967,7 +4003,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -rf ./$(DEPDIR) frontends/tasm/$(DEPDIR) frontends/vsyasm/$(DEPDIR) frontends/yasm/$(DEPDIR) libyasm/$(DEPDIR) libyasm/tests/$(DEPDIR) modules/arch/lc3b/$(DEPDIR) modules/arch/x86/$(DEPDIR) modules/dbgfmts/codeview/$(DEPDIR) modules/dbgfmts/dwarf2/$(DEPDIR) modules/dbgfmts/null/$(DEPDIR) modules/dbgfmts/stabs/$(DEPDIR) modules/listfmts/nasm/$(DEPDIR) modules/objfmts/bin/$(DEPDIR) modules/objfmts/coff/$(DEPDIR) modules/objfmts/dbg/$(DEPDIR) modules/objfmts/elf/$(DEPDIR) modules/objfmts/macho/$(DEPDIR) modules/objfmts/rdf/$(DEPDIR) modules/objfmts/xdf/$(DEPDIR) modules/parsers/gas/$(DEPDIR) modules/parsers/nasm/$(DEPDIR) modules/preprocs/cpp/$(DEPDIR) modules/preprocs/gas/$(DEPDIR) modules/preprocs/nasm/$(DEPDIR) modules/preprocs/raw/$(DEPDIR)
+	-rm -rf ./$(DEPDIR) frontends/tasm/$(DEPDIR) frontends/vsyasm/$(DEPDIR) frontends/yasm/$(DEPDIR) libyasm/$(DEPDIR) libyasm/tests/$(DEPDIR) modules/arch/lc3b/$(DEPDIR) modules/arch/x86/$(DEPDIR) modules/dbgfmts/codeview/$(DEPDIR) modules/dbgfmts/dwarf2/$(DEPDIR) modules/dbgfmts/null/$(DEPDIR) modules/dbgfmts/stabs/$(DEPDIR) modules/listfmts/nasm/$(DEPDIR) modules/objfmts/bin/$(DEPDIR) modules/objfmts/coff/$(DEPDIR) modules/objfmts/dbg/$(DEPDIR) modules/objfmts/elf/$(DEPDIR) modules/objfmts/macho/$(DEPDIR) modules/objfmts/rdf/$(DEPDIR) modules/objfmts/xdf/$(DEPDIR) modules/objfmts/mem/$(DEPDIR) modules/parsers/gas/$(DEPDIR) modules/parsers/nasm/$(DEPDIR) modules/preprocs/cpp/$(DEPDIR) modules/preprocs/gas/$(DEPDIR) modules/preprocs/nasm/$(DEPDIR) modules/preprocs/raw/$(DEPDIR) modules/preprocs/str/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

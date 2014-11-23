@@ -595,6 +595,8 @@ static const x86_info_operand insn_operands[] = {
     {OPT_Imm, OPS_8, 0, 0, OPTM_None, OPA_SImm, OPAP_None},
     {OPT_RM, OPS_64, 0, 0, OPTM_None, OPA_EA, OPAP_None},
     {OPT_Imm, OPS_32, 1, 0, OPTM_None, OPA_Imm, OPAP_SImm8},
+    {OPT_SegReg, OPS_16, 1, 0, OPTM_None, OPA_Spare, OPAP_None},
+    {OPT_Mem, OPS_80, 1, 0, OPTM_None, OPA_EA, OPAP_None},
     {OPT_SIMDReg, OPS_128, 0, 0, OPTM_None, OPA_Spare, OPAP_None},
     {OPT_Mem, OPS_128, 1, 0, OPTM_None, OPA_EA, OPAP_None},
     {OPT_SIMDReg, OPS_256, 0, 0, OPTM_None, OPA_Spare, OPAP_None},
@@ -629,8 +631,6 @@ static const x86_info_operand insn_operands[] = {
     {OPT_Imm, OPS_32, 1, 0, OPTM_None, OPA_Imm, OPAP_None},
     {OPT_Areg, OPS_64, 0, 0, OPTM_None, OPA_None, OPAP_None},
     {OPT_Imm, OPS_32, 1, 0, OPTM_None, OPA_Imm, OPAP_None},
-    {OPT_SegReg, OPS_16, 1, 0, OPTM_None, OPA_Spare, OPAP_None},
-    {OPT_Mem, OPS_80, 1, 0, OPTM_None, OPA_EA, OPAP_None},
     {OPT_SIMDReg, OPS_128, 0, 0, OPTM_None, OPA_Spare, OPAP_None},
     {OPT_Mem, OPS_64, 0, 0, OPTM_None, OPA_EA, OPAP_None},
     {OPT_SIMDReg, OPS_256, 0, 0, OPTM_None, OPA_Spare, OPAP_None},
@@ -827,11 +827,11 @@ static const x86_insn_info movabs_insn[] = {
 };
 
 static const x86_insn_info movszx_insn[] = {
-   { SUF_B|SUF_Z, 0, CPU_386, 0, 0, {MOD_Op1Add, 0, 0}, 16, 0, 0, 2, {0x0F, 0x00, 0}, 0, 2, 603 },
+   { SUF_B|SUF_Z, 0, CPU_386, 0, 0, {MOD_Op1Add, 0, 0}, 16, 0, 0, 2, {0x0F, 0x00, 0}, 0, 2, 605 },
     { SUF_B|SUF_Z, 0, CPU_386, 0, 0, {MOD_Op1Add, 0, 0}, 32, 0, 0, 2, {0x0F, 0x00, 0}, 0, 2, 537 },
     { SUF_B|SUF_Z, ONLY_64, 0, 0, 0, {MOD_Op1Add, 0, 0}, 64, 0, 0, 2, {0x0F, 0x00, 0}, 0, 2, 541 },
     { SUF_W|SUF_Z, 0, CPU_386, 0, 0, {MOD_Op1Add, 0, 0}, 32, 0, 0, 2, {0x0F, 0x01, 0}, 0, 2, 539 },
-    { SUF_W|SUF_Z, ONLY_64, 0, 0, 0, {MOD_Op1Add, 0, 0}, 64, 0, 0, 2, {0x0F, 0x01, 0}, 0, 2, 605 }
+    { SUF_W|SUF_Z, ONLY_64, 0, 0, 0, {MOD_Op1Add, 0, 0}, 64, 0, 0, 2, {0x0F, 0x01, 0}, 0, 2, 607 }
 };
 
 static const x86_insn_info movsxd_insn[] = {
@@ -924,7 +924,7 @@ static const x86_insn_info xchg_insn[] = {
 static const x86_insn_info in_insn[] = {
    { SUF_B|SUF_Z, 0, 0, 0, 0, {0, 0, 0}, 0, 0, 0, 1, {0xE4, 0, 0}, 0, 2, 498 },
     { SUF_W|SUF_Z, 0, 0, 0, 0, {0, 0, 0}, 16, 0, 0, 1, {0xE5, 0, 0}, 0, 2, 500 },
-    { SUF_L|SUF_Z, 0, CPU_386, 0, 0, {0, 0, 0}, 32, 0, 0, 1, {0xE5, 0, 0}, 0, 2, 617 },
+    { SUF_L|SUF_Z, 0, CPU_386, 0, 0, {0, 0, 0}, 32, 0, 0, 1, {0xE5, 0, 0}, 0, 2, 619 },
     { SUF_B|SUF_Z, 0, 0, 0, 0, {0, 0, 0}, 0, 0, 0, 1, {0xEC, 0, 0}, 0, 2, 504 },
     { SUF_W|SUF_Z, 0, 0, 0, 0, {0, 0, 0}, 16, 0, 0, 1, {0xED, 0, 0}, 0, 2, 506 },
     { SUF_L|SUF_Z, 0, CPU_386, 0, 0, {0, 0, 0}, 32, 0, 0, 1, {0xED, 0, 0}, 0, 2, 502 },
@@ -1022,9 +1022,9 @@ static const x86_insn_info div_insn[] = {
 
 static const x86_insn_info test_insn[] = {
    { SUF_B|SUF_Z, 0, 0, 0, 0, {0, 0, 0}, 0, 0, 0, 1, {0xA8, 0, 0}, 0, 2, 498 },
-    { SUF_W|SUF_Z, 0, 0, 0, 0, {0, 0, 0}, 16, 0, 0, 1, {0xA9, 0, 0}, 0, 2, 623 },
-    { SUF_L|SUF_Z, 0, CPU_386, 0, 0, {0, 0, 0}, 32, 0, 0, 1, {0xA9, 0, 0}, 0, 2, 625 },
-    { SUF_Q|SUF_Z, ONLY_64, 0, 0, 0, {0, 0, 0}, 64, 0, 0, 1, {0xA9, 0, 0}, 0, 2, 627 },
+    { SUF_W|SUF_Z, 0, 0, 0, 0, {0, 0, 0}, 16, 0, 0, 1, {0xA9, 0, 0}, 0, 2, 625 },
+    { SUF_L|SUF_Z, 0, CPU_386, 0, 0, {0, 0, 0}, 32, 0, 0, 1, {0xA9, 0, 0}, 0, 2, 627 },
+    { SUF_Q|SUF_Z, ONLY_64, 0, 0, 0, {0, 0, 0}, 64, 0, 0, 1, {0xA9, 0, 0}, 0, 2, 629 },
     { SUF_B|SUF_Z, 0, 0, 0, 0, {0, 0, 0}, 0, 0, 0, 1, {0xF6, 0, 0}, 0, 2, 421 },
     { SUF_B|SUF_Z, 0, 0, 0, 0, {0, 0, 0}, 0, 0, 0, 1, {0xF6, 0, 0}, 0, 2, 413 },
     { SUF_W|SUF_Z, 0, 0, 0, 0, {0, 0, 0}, 16, 0, 0, 1, {0xF7, 0, 0}, 0, 2, 423 },
@@ -1334,7 +1334,7 @@ static const x86_insn_info fstp_insn[] = {
 };
 
 static const x86_insn_info fldstpt_insn[] = {
-   { SUF_Z, 0, CPU_FPU, 0, 0, {MOD_SpAdd, 0, 0}, 0, 0, 0, 1, {0xDB, 0, 0}, 0, 1, 619 }
+   { SUF_Z, 0, CPU_FPU, 0, 0, {MOD_SpAdd, 0, 0}, 0, 0, 0, 1, {0xDB, 0, 0}, 0, 1, 596 }
 };
 
 static const x86_insn_info fildstp_insn[] = {
@@ -1345,7 +1345,7 @@ static const x86_insn_info fildstp_insn[] = {
 };
 
 static const x86_insn_info fbldstp_insn[] = {
-   { SUF_Z, 0, CPU_FPU, 0, 0, {MOD_SpAdd, 0, 0}, 0, 0, 0, 1, {0xDF, 0, 0}, 0, 1, 619 }
+   { SUF_Z, 0, CPU_FPU, 0, 0, {MOD_SpAdd, 0, 0}, 0, 0, 0, 1, {0xDF, 0, 0}, 0, 1, 596 }
 };
 
 static const x86_insn_info fst_insn[] = {
@@ -1621,8 +1621,8 @@ static const x86_insn_info movmsk_insn[] = {
 };
 
 static const x86_insn_info movnt_insn[] = {
-   { SUF_Z, 0, CPU_SSE, 0, 0, {MOD_PreAdd, MOD_Op1Add, MOD_SetVEX}, 0, 0, 0x00, 2, {0x0F, 0x00, 0}, 0, 2, 599 },
-    { SUF_Z, ONLY_AVX, CPU_AVX, 0, 0, {MOD_PreAdd, MOD_Op1Add, 0}, 0, 0, 0xC4, 2, {0x0F, 0x00, 0}, 0, 2, 601 }
+   { SUF_Z, 0, CPU_SSE, 0, 0, {MOD_PreAdd, MOD_Op1Add, MOD_SetVEX}, 0, 0, 0x00, 2, {0x0F, 0x00, 0}, 0, 2, 601 },
+    { SUF_Z, ONLY_AVX, CPU_AVX, 0, 0, {MOD_PreAdd, MOD_Op1Add, 0}, 0, 0, 0xC4, 2, {0x0F, 0x00, 0}, 0, 2, 603 }
 };
 
 static const x86_insn_info movntq_insn[] = {
@@ -1693,7 +1693,7 @@ static const x86_insn_info cvt_rx_xmm64_insn[] = {
 };
 
 static const x86_insn_info cvt_mm_xmm_insn[] = {
-   { SUF_Z, 0, CPU_SSE2, 0, 0, {MOD_PreAdd, MOD_Op1Add, 0}, 0, 0, 0x00, 2, {0x0F, 0x00, 0}, 0, 2, 615 }
+   { SUF_Z, 0, CPU_SSE2, 0, 0, {MOD_PreAdd, MOD_Op1Add, 0}, 0, 0, 0x00, 2, {0x0F, 0x00, 0}, 0, 2, 617 }
 };
 
 static const x86_insn_info cvt_xmm_mm_ss_insn[] = {
@@ -1701,8 +1701,8 @@ static const x86_insn_info cvt_xmm_mm_ss_insn[] = {
 };
 
 static const x86_insn_info eptvpid_insn[] = {
-   { SUF_L|SUF_Z, NOT_64, CPU_386, CPU_EPTVPID, 0, {MOD_Op2Add, 0, 0}, 32, 0, 0x66, 3, {0x0F, 0x38, 0x80}, 0, 2, 611 },
-    { SUF_Q|SUF_Z, ONLY_64, CPU_EPTVPID, 0, 0, {MOD_Op2Add, 0, 0}, 64, 0, 0x66, 3, {0x0F, 0x38, 0x80}, 0, 2, 613 }
+   { SUF_L|SUF_Z, NOT_64, CPU_386, CPU_EPTVPID, 0, {MOD_Op2Add, 0, 0}, 32, 0, 0x66, 3, {0x0F, 0x38, 0x80}, 0, 2, 613 },
+    { SUF_Q|SUF_Z, ONLY_64, CPU_EPTVPID, 0, 0, {MOD_Op2Add, 0, 0}, 64, 0, 0x66, 3, {0x0F, 0x38, 0x80}, 0, 2, 615 }
 };
 
 static const x86_insn_info vmxmemrd_insn[] = {
@@ -1743,8 +1743,8 @@ static const x86_insn_info pslrldq_insn[] = {
 };
 
 static const x86_insn_info lddqu_insn[] = {
-   { SUF_Z, 0, CPU_SSE3, 0, 0, {MOD_SetVEX, 0, 0}, 0, 0, 0xF2, 2, {0x0F, 0xF0, 0}, 0, 2, 595 },
-    { SUF_Z, ONLY_AVX, CPU_AVX, 0, 0, {0, 0, 0}, 0, 0, 0xC7, 2, {0x0F, 0xF0, 0}, 0, 2, 597 }
+   { SUF_Z, 0, CPU_SSE3, 0, 0, {MOD_SetVEX, 0, 0}, 0, 0, 0xF2, 2, {0x0F, 0xF0, 0}, 0, 2, 597 },
+    { SUF_Z, ONLY_AVX, CPU_AVX, 0, 0, {0, 0, 0}, 0, 0, 0xC7, 2, {0x0F, 0xF0, 0}, 0, 2, 599 }
 };
 
 static const x86_insn_info ssse3_insn[] = {
@@ -1834,8 +1834,8 @@ static const x86_insn_info insertps_insn[] = {
 };
 
 static const x86_insn_info movntdqa_insn[] = {
-   { SUF_Z, 0, CPU_SSE41, 0, 0, {MOD_SetVEX, 0, 0}, 0, 0, 0x66, 3, {0x0F, 0x38, 0x2A}, 0, 2, 595 },
-    { SUF_Z, ONLY_AVX, CPU_AVX2, 0, 0, {0, 0, 0}, 0, 0, 0xC5, 3, {0x0F, 0x38, 0x2A}, 0, 2, 597 }
+   { SUF_Z, 0, CPU_SSE41, 0, 0, {MOD_SetVEX, 0, 0}, 0, 0, 0x66, 3, {0x0F, 0x38, 0x2A}, 0, 2, 597 },
+    { SUF_Z, ONLY_AVX, CPU_AVX2, 0, 0, {0, 0, 0}, 0, 0, 0xC5, 3, {0x0F, 0x38, 0x2A}, 0, 2, 599 }
 };
 
 static const x86_insn_info sse4pcmpstr_insn[] = {
@@ -1964,8 +1964,8 @@ static const x86_insn_info avx_cvt_xmm128_y_insn[] = {
 };
 
 static const x86_insn_info avx_cvt_xmm128_insn[] = {
-   { SUF_Z, ONLY_AVX, CPU_AVX, 0, 0, {MOD_PreAdd, MOD_Op1Add, 0}, 0, 0, 0xC0, 2, {0x0F, 0x00, 0}, 0, 2, 607 },
-    { SUF_Z, ONLY_AVX, CPU_AVX, 0, 0, {MOD_PreAdd, MOD_Op1Add, 0}, 0, 0, 0xC4, 2, {0x0F, 0x00, 0}, 0, 2, 609 }
+   { SUF_Z, ONLY_AVX, CPU_AVX, 0, 0, {MOD_PreAdd, MOD_Op1Add, 0}, 0, 0, 0xC0, 2, {0x0F, 0x00, 0}, 0, 2, 609 },
+    { SUF_Z, ONLY_AVX, CPU_AVX, 0, 0, {MOD_PreAdd, MOD_Op1Add, 0}, 0, 0, 0xC4, 2, {0x0F, 0x00, 0}, 0, 2, 611 }
 };
 
 static const x86_insn_info vbroadcastss_insn[] = {
@@ -2051,7 +2051,7 @@ static const x86_insn_info vpbroadcastq_avx2_insn[] = {
    { SUF_Z, ONLY_AVX, CPU_AVX2, 0, 0, {0, 0, 0}, 0, 0, 0xC1, 3, {0x0F, 0x38, 0x59}, 0, 2, 543 },
     { SUF_Z, ONLY_AVX, CPU_AVX2, 0, 0, {0, 0, 0}, 0, 0, 0xC5, 3, {0x0F, 0x38, 0x59}, 0, 2, 545 },
     { SUF_Z, ONLY_AVX, CPU_AVX2, 0, 0, {0, 0, 0}, 0, 0, 0xC1, 3, {0x0F, 0x38, 0x59}, 0, 2, 333 },
-    { SUF_Z, ONLY_AVX, CPU_AVX2, 0, 0, {0, 0, 0}, 0, 0, 0xC5, 3, {0x0F, 0x38, 0x59}, 0, 2, 621 }
+    { SUF_Z, ONLY_AVX, CPU_AVX2, 0, 0, {0, 0, 0}, 0, 0, 0xC5, 3, {0x0F, 0x38, 0x59}, 0, 2, 623 }
 };
 
 static const x86_insn_info vpshiftv_vexw0_avx2_insn[] = {
@@ -2309,8 +2309,8 @@ static const x86_insn_info bextr_insn[] = {
 };
 
 static const x86_insn_info invpcid_insn[] = {
-   { SUF_Z, NOT_64, CPU_386, CPU_INVPCID, CPU_Priv, {0, 0, 0}, 0, 0, 0x66, 3, {0x0F, 0x38, 0x82}, 0, 2, 611 },
-    { SUF_Z, ONLY_64, CPU_INVPCID, CPU_Priv, 0, {0, 0, 0}, 0, 64, 0x66, 3, {0x0F, 0x38, 0x82}, 0, 2, 613 }
+   { SUF_Z, NOT_64, CPU_386, CPU_INVPCID, CPU_Priv, {0, 0, 0}, 0, 0, 0x66, 3, {0x0F, 0x38, 0x82}, 0, 2, 613 },
+    { SUF_Z, ONLY_64, CPU_INVPCID, CPU_Priv, 0, {0, 0, 0}, 0, 64, 0x66, 3, {0x0F, 0x38, 0x82}, 0, 2, 615 }
 };
 
 static const x86_insn_info intel_SHA1MSG1_insn[] = {
@@ -2391,15 +2391,15 @@ static const x86_insn_info rdwrshr_insn[] = {
 };
 
 static const x86_insn_info rsdc_insn[] = {
-   { SUF_Z, 0, CPU_486, CPU_Cyrix, CPU_SMM, {0, 0, 0}, 0, 0, 0, 2, {0x0F, 0x79, 0}, 0, 2, 629 }
+   { SUF_Z, 0, CPU_486, CPU_Cyrix, CPU_SMM, {0, 0, 0}, 0, 0, 0, 2, {0x0F, 0x79, 0}, 0, 2, 595 }
 };
 
 static const x86_insn_info cyrixsmm_insn[] = {
-   { SUF_Z, 0, CPU_486, CPU_Cyrix, CPU_SMM, {MOD_Op1Add, 0, 0}, 0, 0, 0, 2, {0x0F, 0x00, 0}, 0, 1, 619 }
+   { SUF_Z, 0, CPU_486, CPU_Cyrix, CPU_SMM, {MOD_Op1Add, 0, 0}, 0, 0, 0, 2, {0x0F, 0x00, 0}, 0, 1, 596 }
 };
 
 static const x86_insn_info svdc_insn[] = {
-   { SUF_Z, 0, CPU_486, CPU_Cyrix, CPU_SMM, {0, 0, 0}, 0, 0, 0, 2, {0x0F, 0x78, 0}, 0, 2, 619 }
+   { SUF_Z, 0, CPU_486, CPU_Cyrix, CPU_SMM, {0, 0, 0}, 0, 0, 0, 2, {0x0F, 0x78, 0}, 0, 2, 621 }
 };
 
 static const x86_insn_info ibts_insn[] = {

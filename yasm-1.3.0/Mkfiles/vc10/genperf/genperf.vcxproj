@@ -82,7 +82,7 @@
       <Command>run.bat "$(TargetPath)"</Command>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Outputs>x86insn_nasm.c;x86insn_gas.c;x86cpu.c;x86regtmod.c;%(Outputs)</Outputs>
+      <Outputs>..\..\..\x86insn_nasm.c;..\..\..\x86insn_gas.c;..\..\..\x86cpu.c;..\..\..\x86regtmod.c;%(Outputs)</Outputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -116,7 +116,7 @@
       <Command>run.bat "$(TargetPath)"</Command>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Outputs>x86insn_nasm.c;x86insn_gas.c;x86cpu.c;x86regtmod.c;%(Outputs)</Outputs>
+      <Outputs>..\..\..\x86insn_nasm.c;..\..\..\x86insn_gas.c;..\..\..\x86cpu.c;..\..\..\x86regtmod.c;%(Outputs)</Outputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>

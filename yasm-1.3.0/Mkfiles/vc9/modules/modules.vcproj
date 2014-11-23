@@ -484,6 +484,10 @@
 					RelativePath="..\..\..\modules\objfmts\xdf\xdf-objfmt.c"
 					>
 				</File>
+				<File
+					RelativePath="..\..\..\modules\objfmts\mem\mem-objfmt.c"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="parsers"
@@ -593,6 +597,14 @@
 					</File>
 					<File
 						RelativePath="..\..\..\modules\preprocs\gas\gas-preproc.c"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="str"
+					>
+					<File
+						RelativePath="..\..\..\modules\preprocs\str\str-preproc.c"
 						>
 					</File>
 				</Filter>

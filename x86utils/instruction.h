@@ -1,5 +1,8 @@
-#ifndef __OPCODE_H__
-#define __OPCODE_H__
+#ifndef __INSTRUCTION_H__
+#define __INSTRUCTION_H__
+
+#include <udis86.h>
+#include <stdint.h>
 
 enum OPERAND_TYPE
 {
@@ -20,8 +23,27 @@ enum OPERAND_TYPE
 	OP_CONST = 0x60,
 };
 
+enum REGISTER_TYPES
+{
+    RT_REG8 = 0x10,
+    RT_REG16 = 0x20,
+    RT_REG32 = 0x30,
+    RT_SEG = 0x40,
+    RT_ST = 0x50,
+    RT_CR = 0x60,
+    RT_DR = 0x70,
+    RT_MM = 0x80,
+    RT_XMM = 0x90,
+    RT_REG8S = 0xa4,
+    RT_REG64 = 0xb0,
+    RT_RIP = 0xc0,
+};
+
+/*
 enum REGISTER
 {
+	R_NONE = 0x0,
+
     R_AL = 0x10,
     R_CL = 0x11,
     R_DL = 0x12,
@@ -185,8 +207,9 @@ enum REGISTER
 
     R_RIP = 0xc0,
 };
+*/
 
-enum BYTE_OPERAND_TYPE
+enum OPERAND_TYPE_INFO
 {
   NOP_NONE = 0x0,
   NOP_REG8 = 0x1,
@@ -211,8 +234,43 @@ enum BYTE_OPERAND_TYPE
   NOP_REG_RSP = 0x17,
 };
 
+typedef struct operand_info {
+	enum OPERAND_TYPE type;
+	uint8_t size;
+	uint8_t has_operand_size;
 
-char * regs[] = {"asdasd", "asd"};
+	// for OP_REG
+	ud_type_t reg;
 
+	// for OP_IMM/OP_CONST/OP_JIMM
+	uint64_t value;
+
+	// for OP_MEM
+	ud_type_t segment;
+	ud_type_t base;
+	ud_type_t index;
+	uint8_t scale;
+	uint64_t displacement;
+
+	// for OP_PTR
+	uint16_t ptr_segment;
+	uint32_t ptr_offset;
+} operand_info_t;
+
+typedef struct instruction_info {
+	ud_mnemonic_code_t mnemonic;
+	int mode; // 32/64 bits
+	uint8_t size;
+	uint8_t operation_size_prefix;
+	uint8_t address_size_prefix;
+	uint8_t lock;
+	uint8_t rep;
+	uint8_t repe;
+	uint8_t repne;
+	uint8_t near;
+	uint8_t far;
+	ud_type_t segment;
+	operand_info_t operands[3];
+} instruction_info_t;
 
 #endif

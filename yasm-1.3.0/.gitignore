@@ -1,0 +1,15 @@
+/nasm-macros.c
+/nasm-token.c
+/nasm-version.c
+/version.mac
+/win64-gas.c
+/win64-nasm.c
+/x86cpu.c
+/x86insn_gas.c
+/x86insn_nasm.c
+/x86regtmod.c
+/YASM-VERSION-FILE
+/YASM-VERSION.h
+/gas-token.c
+/lc3bid.c
+/module.c

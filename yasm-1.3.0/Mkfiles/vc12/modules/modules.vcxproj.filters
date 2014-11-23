@@ -38,6 +38,9 @@
     <Filter Include="Source Files\preprocs\raw">
       <UniqueIdentifier>{48fc77ec-7d78-4c0a-bfc2-9aa76faf5d7f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\preprocs\str">
+      <UniqueIdentifier>{89c61f4d-b637-455d-81fb-9c6b8100d8dc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\gas-token.c">
@@ -176,6 +179,12 @@
       <Filter>Source Files\arch</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\modules\objfmts\elf\elf-x86-x32.c">
+      <Filter>Source Files\objfmts</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\modules\preprocs\str\str-preproc.c">
+      <Filter>Source Files\preprocs\str</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\modules\objfmts\mem\mem-objfmt.c">
       <Filter>Source Files\objfmts</Filter>
     </ClCompile>
   </ItemGroup>

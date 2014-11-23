@@ -77,11 +77,13 @@ splint \
  modules/objfmts/macho/macho-objfmt.c \
  modules/objfmts/rdf/rdf-objfmt.c \
  modules/objfmts/xdf/xdf-objfmt.c \
+ modules/objfmts/mem/mem-objfmt.c \
  modules/parsers/gas/gas-parse.c \
  modules/parsers/gas/gas-parse-intel.c \
  modules/parsers/gas/gas-parser.c \
  modules/parsers/nasm/nasm-parse.c \
  modules/parsers/nasm/nasm-parser.c \
  modules/preprocs/nasm/nasm-preproc.c \
- modules/preprocs/raw/raw-preproc.c
+ modules/preprocs/raw/raw-preproc.c \
+ modules/preprocs/str/str-preproc.c
 

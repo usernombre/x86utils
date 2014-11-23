@@ -240,6 +240,7 @@
     <ClCompile Include="..\..\..\modules\objfmts\rdf\rdf-objfmt.c" />
     <ClCompile Include="..\..\..\modules\objfmts\coff\win64-except.c" />
     <ClCompile Include="..\..\..\modules\objfmts\xdf\xdf-objfmt.c" />
+    <ClCompile Include="..\..\..\modules\objfmts\mem\mem-objfmt.c" />
     <ClCompile Include="..\..\..\modules\parsers\gas\gas-parse.c" />
     <ClCompile Include="..\..\..\modules\parsers\gas\gas-parser.c" />
     <ClCompile Include="..\..\..\gas-token.c" />
@@ -253,6 +254,7 @@
     <ClCompile Include="..\..\..\modules\preprocs\raw\raw-preproc.c" />
     <ClCompile Include="..\..\..\modules\preprocs\cpp\cpp-preproc.c" />
     <ClCompile Include="..\..\..\modules\listfmts\nasm\nasm-listfmt.c" />
+    <ClCompile Include="..\..\..\modules\preprocs\str\str-preproc.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\libyasm.h" />

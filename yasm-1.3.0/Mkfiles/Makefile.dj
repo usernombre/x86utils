@@ -94,6 +94,7 @@ MODULES_OBJFMTS_OBJS= \
  modules/objfmts/macho/macho-objfmt.o \
  modules/objfmts/rdf/rdf-objfmt.o \
  modules/objfmts/xdf/xdf-objfmt.o
+ modules/objfmts/mem/mem-objfmt.o \
 YASM_MODULES+=objfmt_dbg
 YASM_MODULES+=objfmt_bin objfmt_dosexe
 YASM_MODULES+=objfmt_coff objfmt_win32 objfmt_win64 objfmt_x64
@@ -101,6 +102,7 @@ YASM_MODULES+=objfmt_elf objfmt_elf32 objfmt_elf64 objfmt_elfx32
 YASM_MODULES+=objfmt_macho objfmt_macho32 objfmt_macho64
 YASM_MODULES+=objfmt_rdf
 YASM_MODULES+=objfmt_xdf
+YASM_MODULES+=objfmt_mem
 
 MODULES_PARSERS_OBJS= \
  modules/parsers/nasm/nasm-parser.o \
@@ -132,6 +134,10 @@ MODULES_PREPROCS_GAS_OBJS = \
  modules/preprocs/gas/gas-eval.o \
  modules/preprocs/gas/gas-preproc.o
 YASM_MODULES+=preproc_gas
+
+MODULES_PREPROCS_STR_OBJS = \
+ modules/preprocs/str/str-preproc.o
+YASM_MODULES+=preproc_str
 
 MODULES_PREPROCS_OBJS = \
  $(MODULES_PREPROCS_NASM_OBJS) \

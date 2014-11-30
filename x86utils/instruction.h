@@ -4,7 +4,7 @@
 #include <udis86.h>
 #include <stdint.h>
 
-enum OPERAND_TYPE
+typedef enum operand_type
 {
 	NONE = 0x0,
 	OP_REG = 0x10,
@@ -20,9 +20,9 @@ enum OPERAND_TYPE
 	OP_IMM_64 = 0x34,
 	OP_PTR = 0x40,
 	OP_JIMM = 0x50,
-	OP_CONST = 0x60,
-};
+} operand_type_t;
 
+/*
 enum REGISTER_TYPES
 {
     RT_REG8 = 0x10,
@@ -37,7 +37,7 @@ enum REGISTER_TYPES
     RT_REG8S = 0xa4,
     RT_REG64 = 0xb0,
     RT_RIP = 0xc0,
-};
+};*/
 
 /*
 enum REGISTER
@@ -223,21 +223,23 @@ enum OPERAND_TYPE_INFO
   NOP_IMM_16 = 0x9,
   NOP_IMM_32 = 0xA,
   NOP_IMM_64 = 0xB,
-  NOP_ADDRESS_8 = 0xC,
-  NOP_ADDRESS_16 = 0xD,
-  NOP_ADDRESS_32 = 0xE,
-  NOP_ADDRESS_64 = 0xF,
-  NOP_ADDRESS_8_ESP = 0x13,
-  NOP_ADDRESS_16_ESP = 0x14,
-  NOP_ADDRESS_32_ESP = 0x15,
-  NOP_ADDRESS_64_ESP = 0x16,
+  NOP_MEM_8 = 0xC,
+  NOP_MEM_16 = 0xD,
+  NOP_MEM_32 = 0xE,
+  NOP_MEM_64 = 0xF,
+  NOP_MEM_8_SP = 0x13,
+  NOP_MEM_16_SP = 0x14,
+  NOP_MEM_32_SP = 0x15,
+  NOP_MEM_64_SP = 0x16,
   NOP_REG_RSP = 0x17,
 };
 
 typedef struct operand_info {
-	enum OPERAND_TYPE type;
+	operand_type_t type;
 	uint8_t size;
+#ifdef OPTIMIZE_MEMORY_SIZE
 	uint8_t has_operand_size;
+#endif
 
 	// for OP_REG
 	ud_type_t reg;
@@ -250,7 +252,7 @@ typedef struct operand_info {
 	ud_type_t base;
 	ud_type_t index;
 	uint8_t scale;
-	uint64_t displacement;
+	int64_t offset;
 
 	// for OP_PTR
 	uint16_t ptr_segment;
@@ -258,7 +260,7 @@ typedef struct operand_info {
 } operand_info_t;
 
 typedef struct instruction_info {
-	ud_mnemonic_code_t mnemonic;
+	ud_mnemonic_code_t opcode;
 	int mode; // 32/64 bits
 	uint8_t size;
 	uint8_t operation_size_prefix;

@@ -6,23 +6,22 @@
 #include <libudis86\decode.h>
 #include <libudis86\syn.h>
 
-#define LIBRARY_EXPORTS
 #include "instruction.h"
 #include "x86utils.h"
 
 
-const char * mnemonic_string(ud_mnemonic_code_t mnemonic) {
+const char * opcode_string(ud_mnemonic_code_t mnemonic) {
 	if ((uint32_t)mnemonic < UD_MAX_MNEMONIC_CODE) {
 		return ud_lookup_mnemonic(mnemonic);
 	}
-	return NULL;
+	return "";
 }
 
 const char * register_string(ud_type_t reg) {
 	if (reg >= UD_R_AL && reg <= UD_R_RIP) {
 		return ud_reg_tab[reg - UD_R_AL];
 	}
-	return NULL;
+	return "";
 }
 
 typedef struct decode_info {
@@ -76,43 +75,60 @@ static void translate_operand(ud_t * u, ud_operand_t * o, operand_info_t * opera
 		if (o->offset) {
 			if (o->base == UD_NONE && o->index == UD_NONE) {
 				switch (o->offset) {
-					case 16: operand->displacement = o->lval.uword;  break;
-					case 32: operand->displacement = o->lval.udword; break;
-					case 64: operand->displacement = o->lval.uqword; break;
+					case 16: operand->offset = o->lval.uword;  break;
+					case 32: operand->offset = o->lval.udword; break;
+					case 64: operand->offset = o->lval.uqword; break;
 				}
 			} else {
 				switch (o->offset) {
-					case 8 : operand->displacement = o->lval.sbyte;  break;
-					case 16: operand->displacement = o->lval.sword;  break;
-					case 32: operand->displacement = o->lval.sdword; break;
+					case 8 : operand->offset = o->lval.sbyte;  break;
+					case 16: operand->offset = o->lval.sword;  break;
+					case 32: operand->offset = o->lval.sdword; break;
 				}
 			}
 		}
 		break;
 	case UD_OP_IMM:
 		operand->type = OP_IMM;
+		if (o == &u->operand[0]) {
+			// For the case push ..., in this case we are interested in the size of the push
+			operand->size = u->opr_mode;
+		}
 		switch (operand->size) {
 		case 8:
 			operand->type = OP_IMM_8;
-			operand->value = o->lval.sbyte;
 			break;
 		case 16:
 			operand->type = OP_IMM_16;
-			operand->value = o->lval.uword;
 			break;
 		case 32:
 			operand->type = OP_IMM_32;
-			operand->value = o->lval.udword;
 			break;
 		case 64:
 			operand->type = OP_IMM_64;
-			operand->value = o->lval.uqword;
 			break;
+		}
+		if (o->_oprcode == OP_sI && o->size != u->opr_mode) {
+			if (o->size == 8) {
+				operand->value = (int64_t)o->lval.sbyte;
+			} else {
+				operand->value = (int64_t)o->lval.sdword;
+			}
+			if (u->opr_mode < 64) {
+				operand->value &= ((1ull << u->opr_mode) - 1ull);
+			}
+		} else {
+			switch (o->size) {
+			case 8 : operand->value = o->lval.ubyte;  break;
+			case 16: operand->value = o->lval.uword;  break;
+			case 32: operand->value = o->lval.udword; break;
+			case 64: operand->value = o->lval.uqword; break;
+			}
 		}
 		break;
 	case UD_OP_JIMM:
 		operand->type = OP_JIMM;
-		switch (operand->size) {
+		switch (o->size) {
 		case 8:
 			operand->value = (u->pc + o->lval.sbyte) & trunc_mask; break;
 		case 16:
@@ -133,8 +149,10 @@ static void translate_operand(ud_t * u, ud_operand_t * o, operand_info_t * opera
 		}
 		break;
 	case UD_OP_CONST:
-		operand->type = OP_CONST;
+		// Const is only 1 or 3, so let's treat it as imm8.
+		operand->type = OP_IMM_8;
 		operand->value = o->lval.udword;
+		operand->size = 8;
 		break;
 	}
 }
@@ -167,22 +185,24 @@ static void translate_instruction(ud_t * u)
 	inst->repe = u->pfx_repe;
 	inst->repne = u->pfx_repne;
 
-	inst->mnemonic = u->mnemonic;
+	inst->opcode = u->mnemonic;
 	inst->size = (uint8_t)(u->pc - decode_info->address);
 
 	inst->far = u->br_far;
 	inst->near = u->br_near;
-
+	
+#ifdef OPTIMIZE_MEMORY_SIZE
 	inst->operands[0].has_operand_size = 0;
 	inst->operands[1].has_operand_size = 0;
 	inst->operands[2].has_operand_size = 0;
-	
+#endif
 
 	if (u->pfx_seg && u->operand[0].type != UD_OP_MEM && u->operand[1].type != UD_OP_MEM ) {
 	    inst->segment = (ud_type_t)(u->pfx_seg);
 	}
 
 	if (u->operand[0].type != UD_NONE) {
+#ifdef OPTIMIZE_MEMORY_SIZE
 		if (u->operand[0].type == UD_OP_MEM) {
 			if (u->operand[1].type == UD_OP_IMM   ||
 				u->operand[1].type == UD_OP_CONST ||
@@ -206,17 +226,20 @@ static void translate_instruction(ud_t * u)
 					}
 			}
 		}
+#endif
 		translate_operand(u, &u->operand[0], &inst->operands[0]);
 	} else {
 		inst->operands[0].type = NONE;
 	}
 
 	if (u->operand[1].type != UD_NONE) {
+#ifdef OPTIMIZE_MEMORY_SIZE
 		if (u->operand[1].type == UD_OP_MEM &&
 			u->operand[0].size != u->operand[1].size && 
 			!ud_opr_is_sreg(&u->operand[0])) {
 			inst->operands[1].has_operand_size = 1;
 		}
+#endif
 		translate_operand(u, &u->operand[1], &inst->operands[1]);
 	} else {
 		inst->operands[1].type = NONE;
@@ -235,16 +258,20 @@ instruction_info_t * instruction_create(int mode) {
 	if (result == NULL) {
 		return NULL;
 	}
-	memset(result, 0, sizeof(*result));
-	result->mnemonic = UD_Iinvalid;
-	result->mode = mode;
-	result->operands[0].type = NONE;
-	result->operands[1].type = NONE;
-	result->operands[2].type = NONE;
+	instruction_init(result, mode);
 	return result;
 }
 
-void instruction_free(instruction_info_t * inst) {
+void instruction_init(instruction_info_t * inst, int mode) {
+	memset(inst, 0, sizeof(*inst));
+	inst->opcode = UD_Iinvalid;
+	inst->mode = mode;
+	inst->operands[0].type = NONE;
+	inst->operands[1].type = NONE;
+	inst->operands[2].type = NONE;
+}
+
+void instruction_destroy(instruction_info_t * inst) {
 	free(inst);
 }
 
@@ -266,21 +293,22 @@ int instruction_disassemble(instruction_info_t * inst, unsigned char * input_buf
 	ud_set_input_hook(&ud_obj, read_input);
 	ud_disassemble(&ud_obj);
 
-	if (inst->mnemonic == UD_Iinvalid) {
+	if (inst->opcode == UD_Iinvalid) {
 		return -1;
 	}
 	return 0;
 }
 
-static void operand_string(operand_info_t * op, char * output, int output_size) {
+void operand_string(operand_info_t * op, char * output, int output_size) {
 	
 	switch (op->type & ~0xf) {
 	case OP_REG:
-		// TODO
 		strncat(output, register_string(op->reg), output_size - 1);
 		break;
 	case OP_MEM:
+#ifdef OPTIMIZE_MEMORY_SIZE
 		if (op->has_operand_size) {
+#endif
 			switch (op->size) {
 			case 8:		strncat(output, "byte ", output_size - 1); break;
 			case 16:	strncat(output, "word ", output_size - 1); break;
@@ -289,7 +317,9 @@ static void operand_string(operand_info_t * op, char * output, int output_size) 
 			case 40:	strncat(output, "pword ", output_size - 1); break;
 			case 80:	strncat(output, "tword ", output_size - 1); break;
 			}
+#ifdef OPTIMIZE_MEMORY_SIZE
 		}
+#endif
 			
 		if (op->segment) {
 			strncat(output, register_string(op->segment), output_size - 1); 
@@ -309,8 +339,8 @@ static void operand_string(operand_info_t * op, char * output, int output_size) 
 				_snprintf(&output[strlen(output)], output_size - strlen(output) - 1, "*%d", op->scale);
 			}
 		}
-		if (op->displacement) {
-			int64_t value = op->displacement;
+		if (op->offset) {
+			int64_t value = op->offset;
 			if (op->base || op->index) {
 				if (value >= 0) {
 					strncat(output, "+", output_size - 1); 
@@ -325,7 +355,6 @@ static void operand_string(operand_info_t * op, char * output, int output_size) 
 		strncat(output, "]", output_size - 1); 
 		break;
 	case OP_IMM:
-	case OP_CONST:
 	case OP_JIMM:
 		_snprintf(&output[strlen(output)], output_size - strlen(output) - 1, "0x%llx", op->value);
 		break;
@@ -334,8 +363,7 @@ static void operand_string(operand_info_t * op, char * output, int output_size) 
 		break;
 	}
 }
-void instruction_string(instruction_info_t * inst, char * output, int output_size) {
-	memset(output, 0, output_size);
+void instruction_prefix_string(instruction_info_t * inst, char * output, int output_size) {
 	switch (inst->operation_size_prefix) {
 	case 16:
 		strncat(output, "o16 ", output_size - 1); break;
@@ -351,7 +379,6 @@ void instruction_string(instruction_info_t * inst, char * output, int output_siz
 	}
 
 	if (inst->segment) {
-		// TODO
 		strncat(output, register_string(inst->segment), output_size - 1);
 		strncat(output, " ", output_size - 1);
 	}
@@ -365,27 +392,66 @@ void instruction_string(instruction_info_t * inst, char * output, int output_siz
 	} else if (inst->repne) {
 		strncat(output, "repne ", output_size - 1);
 	}
+}
+
+void instruction_string(instruction_info_t * inst, char * output, int output_size) {
+	instruction_prefix_string(inst, output, output_size);
+
+	strncat(output, opcode_string(inst->opcode), output_size - 1);
 	
-	strncat(output, mnemonic_string(inst->mnemonic), output_size - 1);
-	strncat(output, " ", output_size - 1);
-	
-  if (inst->operands[0].type != OP_NONE) {
-	  operand_string(&inst->operands[0], output, output_size);
-  }
-  if (inst->operands[1].type != OP_NONE) {
+	if (inst->operands[0].type != OP_NONE) {
+		strncat(output, " ", output_size - 1);
+		if (inst->operands[0].type == OP_IMM_16) {
+			// For push
+			strncat(output, "word ", output_size - 1);
+		}
+#ifdef OPTIMIZE_MEMORY_SIZE
+		if ((inst->operands[0].type & 0xF0) == OP_MEM) {
+			if ((inst->operands[1].type & 0xF0) == OP_IMM   ||
+				inst->operands[1].type == NONE     ||
+				(inst->operands[0].size != inst->operands[1].size && 
+				inst->operands[1].type != OP_REG)) {
+					inst->operands[0].has_operand_size = 1;
+			} else if (inst->operands[1].type == UD_OP_REG &&
+				inst->operands[1].reg == UD_R_CL) {
+					switch (inst->opcode) {
+					case UD_Ircl:
+					case UD_Irol:
+					case UD_Iror:
+					case UD_Ircr:
+					case UD_Ishl:
+					case UD_Ishr:
+					case UD_Isar:
+						inst->operands[0].has_operand_size = 1;
+						break;
+					default: break;
+					}
+			}
+		}
+#endif
+		operand_string(&inst->operands[0], output, output_size);
+	}
+	if (inst->operands[1].type != OP_NONE) {
 		strncat(output, ", ", output_size - 1);
-	  operand_string(&inst->operands[1], output, output_size);
-  }
-  if (inst->operands[2].type != OP_NONE) {
+#ifdef OPTIMIZE_MEMORY_SIZE
+		if ((inst->operands[1].type & 0xF0) == OP_MEM &&
+			inst->operands[0].size != inst->operands[1].size && 
+			!(inst->operands[0].type == UD_OP_REG && inst->operands[0].reg >= UD_R_ES && inst->operands[0].reg <= UD_R_GS)) {
+			inst->operands[1].has_operand_size = 1;
+		}
+#endif
+		operand_string(&inst->operands[1], output, output_size);
+	}
+	if (inst->operands[2].type != OP_NONE) {
 		strncat(output, ", ", output_size - 1);
-	  operand_string(&inst->operands[2], output, output_size);
-  }
+		operand_string(&inst->operands[2], output, output_size);
+	}
 }
 
 int instruction_assemble(instruction_info_t * inst, unsigned char * output_buffer, size_t * output_size, uint64_t address) {
-	char instruction[100];
+	char instruction[100] = {0};
 	assembler_t * assembler;
-	if (inst->mnemonic == UD_Iinvalid) {
+	if (inst->opcode == UD_Iinvalid) {
 		return -1;
 	}
 	instruction_string(inst, instruction, sizeof(instruction));
@@ -413,12 +479,13 @@ void main() {
 
 	getchar();
 }*/
+/*
 void main() {
-	char instr[100];
+	char instr[100] = {0};
 	assembler_t * asmb;
 	instruction_info_t * inst;
 	asmb = assembler_create(64);
-	if (assembler_assemble(asmb, "mov qword fs:[rax+rbx*4+5], 0x55", 0x550)) {
+	if (assembler_assemble(asmb, "jmp 0x545443", 0x550)) {
 		printf("Error");
 	}
 	inst = instruction_create(64);
@@ -426,4 +493,4 @@ void main() {
 	instruction_string(inst, instr, sizeof(instr));
 	assembler_destroy(asmb);
 	getchar();
-}
+}*/

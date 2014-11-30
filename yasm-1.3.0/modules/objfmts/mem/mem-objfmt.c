@@ -681,6 +681,7 @@ mem_objfmt_output_bytecode(yasm_bytecode *bc, /*@null@*/ void *d)
         /* Output buf (or bigbuf if non-NULL) to file */
 		memcpy(info->output->buffer + info->write_position, bigbuf ? bigbuf : info->buf, (size_t)size);
     }
+	info->write_position += size;
 
     /* If bigbuf was allocated, free it */
     if (bigbuf)

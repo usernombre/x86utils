@@ -5,7 +5,6 @@
 #include <libyasm.h>
 #include <libyasm\bitvect.h>
 
-#define LIBRARY_EXPORTS
 #include "assembler.h"
 #include "x86utils.h"
 
@@ -152,6 +151,16 @@ int assembler_assemble(assembler_t * asmb, const char * assembly, uint64_t addre
 		goto error;
 	}
 
+	// TODO: make warnings thread safe
+	// Enable all warnings
+	yasm_warn_enable(YASM_WARN_GENERAL);
+	yasm_warn_enable(YASM_WARN_UNREC_CHAR);
+	yasm_warn_enable(YASM_WARN_PREPROC);
+	yasm_warn_enable(YASM_WARN_ORPHAN_LABEL);
+	yasm_warn_enable(YASM_WARN_UNINIT_CONTENTS);
+	yasm_warn_enable(YASM_WARN_SIZE_OVERRIDE);
+	yasm_warn_enable(YASM_WARN_IMPLICIT_SIZE_OVERRIDE);
+
     linemap = yasm_linemap_create();
 	if (!linemap) {
 		goto error;
@@ -186,22 +195,22 @@ int assembler_assemble(assembler_t * asmb, const char * assembly, uint64_t addre
 	yasm_arch_set_var(arch, "mode_bits", asmb->bits);
     //yasm_arch_set_var(cur_arch, "force_strict", 0);
 	cur_parser_module->do_parse(object, preproc, 0, linemap, errwarns);
-    if (yasm_errwarns_num_errors(errwarns, 0) > 0) {
+    if (yasm_errwarns_num_errors(errwarns, 1) > 0) {
 		goto error;
 	}
 
     yasm_object_finalize(object, errwarns);
-    if (yasm_errwarns_num_errors(errwarns, 0) > 0) {
+    if (yasm_errwarns_num_errors(errwarns, 1) > 0) {
 		goto error;
 	}
 
     yasm_object_optimize(object, errwarns);
-    if (yasm_errwarns_num_errors(errwarns, 0) > 0) {
+    if (yasm_errwarns_num_errors(errwarns, 1) > 0) {
 		goto error;
 	}
 	
     yasm_objfmt_output(object, (FILE*)&(asmb->output), 0, errwarns);
-    if (yasm_errwarns_num_errors(errwarns, 0) > 0) {
+    if (yasm_errwarns_num_errors(errwarns, 1) > 0) {
 		goto error;
 	}
 	asmb->ready = 1;

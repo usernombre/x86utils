@@ -181,11 +181,11 @@
     <ClCompile Include="..\..\..\modules\objfmts\elf\elf-x86-x32.c">
       <Filter>Source Files\objfmts</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\modules\preprocs\str\str-preproc.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\modules\objfmts\mem\mem-objfmt.c">
       <Filter>Source Files\objfmts</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\modules\preprocs\str\str-preproc.c">
+      <Filter>Source Files\preprocs\str</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\modules\preprocs\str\str-preproc.c">
       <Filter>Source Files\preprocs\str</Filter>

@@ -356,8 +356,16 @@ void operand_string(operand_info_t * op, char * output, int output_size) {
 		break;
 	case OP_IMM:
 	case OP_JIMM:
-		_snprintf(&output[strlen(output)], output_size - strlen(output) - 1, "0x%llx", op->value);
+		{
+		// Because if it is 64 bit immediate (0xffffffff...), our assembler is going to do troubles for us
+		int64_t value = op->value;
+		if (value < 0) {
+			_snprintf(&output[strlen(output)], output_size - strlen(output) - 1, "-0x%llx", -value);
+		} else {
+			_snprintf(&output[strlen(output)], output_size - strlen(output) - 1, "0x%llx", value);
+		}
 		break;
+		}
 	case OP_PTR:
 		_snprintf(&output[strlen(output)], output_size - strlen(output) - 1, "0x%x:0x%x", op->ptr_segment, op->ptr_offset);
 		break;

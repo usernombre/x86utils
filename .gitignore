@@ -7,3 +7,4 @@ ipch
 *.sdf
 *.vcxproj.user
 /*.suo
+/python/pyx86utils.c

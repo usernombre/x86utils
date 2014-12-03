@@ -85,6 +85,11 @@ cdef extern from "x86utils.h":
     int instruction_assemble(instruction_info_t * inst, unsigned char * output_buffer, size_t * output_size, uint64_t address);
 
 OP_NONE = NONE
+
+def _str_to_none(s):
+    if len(s):
+        return s
+    return None
     
 cdef class Operand:
     cdef object instruction
@@ -96,22 +101,22 @@ cdef class Operand:
             return self.operand.type
     property size:
         def __get__(self):
-            return self.operand.size
+            return self.operand.size >> 3
     property reg:
         def __get__(self):
-            return PyString_FromString(register_string(self.operand.reg))
+            return _str_to_none(PyString_FromString(register_string(self.operand.reg)))
     property value:
         def __get__(self):
             return self.operand.value
     property segment:
         def __get__(self):
-            return PyString_FromString(register_string(self.operand.segment))
+            return _str_to_none(PyString_FromString(register_string(self.operand.segment)))
     property base:
         def __get__(self):
-            return PyString_FromString(register_string(self.operand.base))
+            return _str_to_none(PyString_FromString(register_string(self.operand.base)))
     property index:
         def __get__(self):
-            return PyString_FromString(register_string(self.operand.index))
+            return _str_to_none(PyString_FromString(register_string(self.operand.index)))
     property scale:
         def __get__(self):
             return self.operand.scale
@@ -195,14 +200,15 @@ cdef class Instruction:
     def __cinit__(self):
         self.instruction = NULL
         
-    def __init__(self, data, address = 0, mode = 32):
+    def __init__(self, data, address = 0, mode = 32, raise_if_illegal =  True):
         self.instruction = instruction_create(mode) 
         self.address = address
         if self.instruction is NULL:
             raise MemoryError()
             
         if instruction_disassemble(self.instruction, data, len(data), address) != 0:
-            raise Exception("Invalid instruction")
+            if raise_if_illegal:
+                raise Exception("Invalid instruction")
             
         self.next = self.address + self.size
             

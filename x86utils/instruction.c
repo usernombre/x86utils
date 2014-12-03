@@ -136,6 +136,7 @@ static void translate_operand(ud_t * u, ud_operand_t * o, operand_info_t * opera
 		case 32:
 			operand->value = (u->pc + o->lval.sdword) & trunc_mask; break;
 		}
+		operand->size = u->dis_mode; // It is an address
 		break;
 	case UD_OP_PTR:
 		operand->type = OP_PTR;
@@ -339,7 +340,7 @@ void operand_string(operand_info_t * op, char * output, int output_size) {
 				_snprintf(&output[strlen(output)], output_size - strlen(output) - 1, "*%d", op->scale);
 			}
 		}
-		if (op->offset) {
+		if (op->offset || (!op->index && !op->base)) {
 			int64_t value = op->offset;
 			if (op->base || op->index) {
 				if (value >= 0) {

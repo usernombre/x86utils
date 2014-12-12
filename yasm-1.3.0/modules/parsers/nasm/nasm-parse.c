@@ -1414,6 +1414,14 @@ parse_expr6(yasm_parser_nasm *parser_nasm, expr_type type)
             e = p_expr_new_ident(yasm_expr_int(INTNUM_val));
             get_next_token();
             return e;
+        case RELINTNUM:
+			{
+			yasm_expr__item * n = yasm_expr_int(INTNUM_val);
+			n->type = YASM_EXPR_RELINT;
+            e = p_expr_new_ident(n);
+            get_next_token();
+            return e;
+			}
         case REG:
             if (type == DV_EXPR) {
                 yasm_error_set(YASM_ERROR_SYNTAX,

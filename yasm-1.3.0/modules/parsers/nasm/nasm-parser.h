@@ -35,6 +35,7 @@
 
 enum tokentype {
     INTNUM = 258,
+    RELINTNUM,
     FLTNUM,
     DIRECTIVE_NAME,
     FILENAME,

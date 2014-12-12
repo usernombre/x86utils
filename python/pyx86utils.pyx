@@ -1,4 +1,6 @@
 from libc.stdlib cimport malloc, free
+from cpython cimport array
+from array import array
 
 cdef extern from "Python.h":
     object PyString_FromStringAndSize(char *s, Py_ssize_t len)
@@ -23,6 +25,7 @@ cdef extern from "x86utils.h":
     void assembler_destroy(assembler_t * asmb)
     int assembler_assemble(assembler_t * asmb, const char * assembly, uint64_t address);
     int assembler_result(assembler_t * asmb, unsigned char * output, size_t * output_size);
+    int assembler_relocs(assembler_t * asmb, unsigned char * output, size_t * output_size);
     
     # Instruction
     cdef enum ud_mnemonic_code:
@@ -237,8 +240,9 @@ cdef class Assembler:
         if self.assembler is NULL:
             raise MemoryError()
         
-    def assemble(self, str, address = 0):
+    def assemble(self, str, address = 0, return_relocs = False):
         cdef size_t output_size
+        cdef array.array relocs
         if assembler_assemble(self.assembler, str, address) != 0:
             return None
         if assembler_result(self.assembler, <unsigned char *>NULL, &output_size) != 0:    
@@ -246,12 +250,24 @@ cdef class Assembler:
         cdef void * output = malloc(output_size)
         try:
             if output is NULL:
-                return None
+                raise MemoryError()
             if assembler_result(self.assembler, <unsigned char *>output, &output_size) != 0:  
                 return None
-            return PyString_FromStringAndSize(<char *>output, output_size)
+            res = PyString_FromStringAndSize(<char *>output, output_size)
         finally:
             free(output)
+        if return_relocs and res:
+            if assembler_relocs(self.assembler, <unsigned char *>NULL, &output_size) != 0:    
+                return None
+            if (output_size & 3) != 0: # Should be a multiply of 4
+                raise Exception("Invalid relocs size")
+            relocs = array.array('i')
+            array.resize(relocs, output_size >> 2)
+            if assembler_relocs(self.assembler, <unsigned char *>relocs.data.as_voidptr, &output_size) != 0:  
+                return None
+            return res, list(relocs)
+        return res
+        
         
     def __dealloc__(self):
         if self.assembler is not NULL:

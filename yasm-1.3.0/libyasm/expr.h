@@ -47,7 +47,8 @@ typedef enum yasm_expr__type {
     YASM_EXPR_FLOAT = 1<<3, /**< Floating point value */
     YASM_EXPR_SYM = 1<<4,   /**< Symbol */
     YASM_EXPR_PRECBC = 1<<5,/**< Direct bytecode ref (rather than via sym) */
-    YASM_EXPR_EXPR = 1<<6   /**< Subexpression */
+    YASM_EXPR_EXPR = 1<<6,  /**< Subexpression */
+    YASM_EXPR_RELINT = 1<<7,   /**< Relativbe integer value */
 } yasm_expr__type;
 
 /** Expression item. */

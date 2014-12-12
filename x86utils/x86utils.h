@@ -37,5 +37,6 @@ X86UTILS_API void assembler_destroy(assembler_t * asmb);
 
 X86UTILS_API int assembler_assemble(assembler_t * asmb, const char * assembly, uint64_t address);
 X86UTILS_API int assembler_result(assembler_t * asmb, unsigned char * output, size_t * output_size);
+X86UTILS_API int assembler_relocs(assembler_t * asmb, unsigned char * output, size_t * output_size);
 
 #endif

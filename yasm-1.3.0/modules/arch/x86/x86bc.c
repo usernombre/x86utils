@@ -973,6 +973,7 @@ x86_bc_jmp_tobytes(yasm_bytecode *bc, unsigned char **bufp,
 
             jmp->target.size = 8;
             jmp->target.sign = 1;
+			jmp->target.rel_addr = 0; // The jump is relative anyway
             if (output_value(&jmp->target, *bufp, 1,
                              (unsigned long)(*bufp-bufstart), bc, 1, d))
                 return 1;
@@ -1005,6 +1006,7 @@ x86_bc_jmp_tobytes(yasm_bytecode *bc, unsigned char **bufp,
 
             jmp->target.size = i*8;
             jmp->target.sign = 1;
+			jmp->target.rel_addr = 0; // The jump is relative anyway
             if (output_value(&jmp->target, *bufp, i,
                              (unsigned long)(*bufp-bufstart), bc, 1, d))
                 return 1;

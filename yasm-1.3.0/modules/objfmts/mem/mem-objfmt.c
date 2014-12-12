@@ -173,15 +173,20 @@ mem_group_destroy(/*@only@*/ mem_group *group)
     yasm_xfree(group);
 }
 
-typedef struct output_buffer {
+typedef struct buffer {
 	unsigned char *buffer;
 	unsigned long size;
-} output_buffer;
+} buffer;
+
+typedef struct output_info {
+	buffer output;
+	buffer relocs;
+} output_info;
 
 typedef struct mem_objfmt_output_info {
     yasm_object *object;
     yasm_errwarns *errwarns;
-    /*@only@*/ output_buffer *output;
+    /*@only@*/ output_info *output;
     /*@only@*/ unsigned char *buf;
     /*@observer@*/ const yasm_section *sect;
 	unsigned long write_position;
@@ -627,6 +632,17 @@ done:
         value->abs = yasm_expr__level_tree
             (value->abs, 1, 1, 1, 0, mem_objfmt_expr_xform, NULL);
 
+	if (value->rel_addr) {
+		if (yasm__strcasecmp(yasm_arch_get_machine(info->object->arch), "x86") == 0) {
+			info->output->relocs.size += 4;
+			info->output->relocs.buffer = yasm_xrealloc(info->output->relocs.buffer, info->output->relocs.size);
+			*(int *)(info->output->relocs.buffer + info->output->relocs.size - 4) = bc->offset + offset;
+		} else if (yasm__strcasecmp(yasm_arch_get_machine(info->object->arch), "amd64") == 0) {
+			yasm_error_set(YASM_ERROR_GENERAL,
+				N_("Rellocation in 64bit not supported yet"));
+		}
+	}
+
     /* Output */
     switch (yasm_value_output_basic(value, buf, destsize, bc, warn,
                                     info->object->arch)) {
@@ -664,22 +680,22 @@ mem_objfmt_output_bytecode(yasm_bytecode *bc, /*@null@*/ void *d)
         return 0;
     }
 	
-	if (info->write_position + size > info->output->size) {
+	if (info->write_position + size > info->output->output.size) {
 		unsigned long new_size = info->write_position + size;
-		info->output->buffer = yasm_xrealloc(info->output->buffer, new_size);
+		info->output->output.buffer = yasm_xrealloc(info->output->output.buffer, new_size);
 		// zero the new allocation
-		memset(info->output->buffer + info->output->size, 0, new_size - info->output->size);
-		info->output->size = new_size;
+		memset(info->output->output.buffer + info->output->output.size, 0, new_size - info->output->output.size);
+		info->output->output.size = new_size;
 	}
 
     /* Warn that gaps are converted to 0 and write out the 0's. */
     if (gap) {
         yasm_warn_set(YASM_WARN_UNINIT_CONTENTS,
             N_("uninitialized space declared in code/data section: zeroing"));
-        memset(info->output->buffer + info->write_position, 0, size);
+        memset(info->output->output.buffer + info->write_position, 0, size);
     } else {
         /* Output buf (or bigbuf if non-NULL) to file */
-		memcpy(info->output->buffer + info->write_position, bigbuf ? bigbuf : info->buf, (size_t)size);
+		memcpy(info->output->output.buffer + info->write_position, bigbuf ? bigbuf : info->buf, (size_t)size);
     }
 	info->write_position += size;
 
@@ -805,7 +821,7 @@ mem_objfmt_output(yasm_object *object, FILE *f, /*@unused@*/ int all_syms,
     info.object = object;
     info.errwarns = errwarns;
 	// Hack to pass buffer
-	info.output = (output_buffer *)f;
+	info.output = (output_info *)f;
     info.buf = yasm_xmalloc(REGULAR_OUTBUF_SIZE);
     info.tmp_intn = yasm_intnum_create_uint(0);
     TAILQ_INIT(&info.lma_groups);

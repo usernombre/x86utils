@@ -97,16 +97,17 @@ assembler_t * assembler_create(int mode) {
 	if (result == NULL) {
 		return NULL;
 	}
+	memset(result, 0, sizeof(*result));
 	result->bits = mode;
-	result->output.buffer = NULL;
-	result->output.size = 0;
-	result->ready = 0;
 	return result;
 }
 
 void assembler_destroy(assembler_t * asmb) {
-	if (asmb->output.buffer) {
-		yasm_xfree(asmb->output.buffer);
+	if (asmb->output.output.buffer) {
+		yasm_xfree(asmb->output.output.buffer);
+	}
+	if (asmb->output.relocs.buffer) {
+		yasm_xfree(asmb->output.relocs.buffer);
 	}
 	free(asmb);
 }
@@ -122,10 +123,15 @@ int assembler_assemble(assembler_t * asmb, const char * assembly, uint64_t addre
 	yasm_errwarns *errwarns = NULL;
 	char * assembly_line = NULL;
 	
-	if (asmb->output.buffer) {
-		yasm_xfree(asmb->output.buffer);
-		asmb->output.buffer = NULL;
-		asmb->output.size = 0;
+	if (asmb->output.output.buffer) {
+		yasm_xfree(asmb->output.output.buffer);
+		asmb->output.output.buffer = NULL;
+		asmb->output.output.size = 0;
+	}
+	if (asmb->output.relocs.buffer) {
+		yasm_xfree(asmb->output.relocs.buffer);
+		asmb->output.relocs.buffer = NULL;
+		asmb->output.relocs.size = 0;
 	}
 	asmb->ready = 0;
 
@@ -242,19 +248,30 @@ clean:
 	return err;
 }
 
+static int buffer_result(buffer * buffer, unsigned char * output, size_t * output_size) {
+	if (output == NULL) {
+		// Just update the size
+		*output_size = buffer->size;
+		return 0;
+	}
+	if (*output_size < buffer->size) {
+		return -1;
+	}
+	memcpy(output, buffer->buffer, buffer->size);
+	*output_size = buffer->size;
+	return 0;
+}
+
 int assembler_result(assembler_t * asmb, unsigned char * output, size_t * output_size) {
 	if (!asmb->ready) {
 		return -1;
 	}
-	if (output == NULL) {
-		// Just update the size
-		*output_size = asmb->output.size;
-		return 0;
-	}
-	if (*output_size < asmb->output.size) {
+	return buffer_result(&asmb->output.output, output, output_size);
+}
+
+int assembler_relocs(assembler_t * asmb, unsigned char * output, size_t * output_size) {
+	if (!asmb->ready) {
 		return -1;
 	}
-	memcpy(output, asmb->output.buffer, asmb->output.size);
-	*output_size = asmb->output.size;
-	return 0;
+	return buffer_result(&asmb->output.relocs, output, output_size);
 }

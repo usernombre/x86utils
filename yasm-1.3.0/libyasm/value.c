@@ -42,11 +42,35 @@
 
 #include "arch.h"
 
+static int
+fix_relint(yasm_expr *e)
+{
+    int i;
+	int has_rel = 0;
+    for (i=0; i<e->numterms; i++) {
+        switch (e->terms[i].type) {
+            case YASM_EXPR_EXPR:
+                has_rel |= fix_relint(e->terms[i].data.expn); 
+				break;
+			case YASM_EXPR_RELINT:
+				e->terms[i].type = YASM_EXPR_INT;
+				has_rel = 1;
+				break;
+            default:
+                break;
+        }
+    }
+    return has_rel;
+}
 
 void
 yasm_value_initialize(/*@out@*/ yasm_value *value,
                       /*@null@*/ /*@kept@*/ yasm_expr *e, unsigned int size)
 {
+	if (e && fix_relint(e))
+		value->rel_addr = 1;
+	else 
+		value->rel_addr = 0;
     value->abs = e;
     value->rel = NULL;
     value->wrt = NULL;

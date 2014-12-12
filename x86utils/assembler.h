@@ -1,13 +1,18 @@
 #ifndef __ASSEMBLER_H__
 #define __ASSEMBLER_H__
 
-typedef struct output_buffer {
+typedef struct _buffer {
 	unsigned char *buffer;
 	unsigned long size;
-} output_buffer;
+} buffer;
+
+typedef struct output_info {
+	buffer output;
+	buffer relocs;
+} output_info;
 
 typedef struct assembler {
-	output_buffer output;
+	output_info output;
 	int bits;
 	int ready;
 } assembler_t;

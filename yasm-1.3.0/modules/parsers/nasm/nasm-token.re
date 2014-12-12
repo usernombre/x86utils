@@ -199,6 +199,14 @@ scan:
             s->tok[TOKLEN] = savech;
             RETURN(INTNUM);
         }
+        
+        '?0x' hexdigit+ {
+            savech = s->tok[TOKLEN];
+            s->tok[TOKLEN] = '\0';
+            lvalp->intn = yasm_intnum_create_hex(TOK+3);
+            s->tok[TOKLEN] = savech;
+            RETURN(RELINTNUM);
+        }
 
         /* floating point value */
         digit+ "." digit* ('e' [-+]? digit+)? {

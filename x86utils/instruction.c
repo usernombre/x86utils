@@ -499,13 +499,13 @@ void main() {
 	char instr[100] = {0};
 	assembler_t * asmb;
 	instruction_info_t * inst;
-	asmb = assembler_create(64);
-	if (assembler_assemble(asmb, "lea rax, [?0x22224444]", 0x22223333ULL)) {
+	asmb = assembler_create(32);
+	if (assembler_assemble(asmb, "jmp ?0x55", 0)) {
 	//if (assembler_assemble(asmb, "lea rax, [rip+0x1111]", 0x122223333ULL)) {
 		printf("Error");
 	}
-	inst = instruction_create(64);
-	instruction_disassemble(inst, asmb->output.buffer, asmb->output.size, 0x122223333ULL);
+	inst = instruction_create(32);
+	instruction_disassemble(inst, asmb->output.output.buffer, asmb->output.output.size, 0x122223333ULL);
 	instruction_string(inst, instr, sizeof(instr));
 	assembler_destroy(asmb);
 	getchar();

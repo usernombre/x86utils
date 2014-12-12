@@ -179,6 +179,8 @@ typedef struct yasm_value {
      */
     unsigned int sign : 1;
 
+	unsigned int rel_addr : 1;
+
     /** Size of the value, in bits. */
     unsigned int size : 8;
 } yasm_value;

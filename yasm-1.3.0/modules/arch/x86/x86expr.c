@@ -828,10 +828,25 @@ yasm_x86__expr_checkea(x86_effaddr *x86_ea, unsigned char *addrsize,
         /* If we're supposed to be RIP-relative and there's no register
          * usage, change to RIP-relative.
          */
-        if (basereg == REG3264_NONE && indexreg == REG3264_NONE &&
-            x86_ea->ea.pc_rel) {
-            basereg = REG64_RIP;
-            yasm_value_set_curpos_rel(&x86_ea->ea.disp, bc, 1);
+        if (basereg == REG3264_NONE && indexreg == REG3264_NONE) {
+			int make_rel = 0;
+			if (x86_ea->ea.pc_rel) {
+				make_rel = 1;
+			} else if (bits == 64 && x86_ea->ea.disp.abs) {
+				yasm_intnum *num = yasm_expr_get_intnum(&x86_ea->ea.disp.abs, 0);
+				long val;
+				if (num) {
+					val = yasm_intnum_get_int(num);
+					if (!yasm_intnum_check_size(num, 32, 0, 2)) {
+						// Try to convert it to relative
+						make_rel = 1;
+					}
+				}
+			}
+			if (make_rel) {
+				basereg = REG64_RIP;
+				yasm_value_set_curpos_rel(&x86_ea->ea.disp, bc, 1);
+			}
         }
 
         /* First determine R/M (Mod is later determined from disp size) */

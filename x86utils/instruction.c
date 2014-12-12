@@ -41,7 +41,7 @@ static int read_input(ud_t * ud_obj) {
 }
 
 static void translate_operand(ud_t * u, ud_operand_t * o, operand_info_t * operand) {
-    const uint64_t trunc_mask = 0xffffffffffffffffull >> (64 - u->opr_mode);
+    const uint64_t trunc_mask = 0xffffffffffffffffull >> (64 - u->dis_mode);
 	operand->size = o->size;
 	switch (o->type) {
 	case UD_OP_REG:
@@ -86,6 +86,12 @@ static void translate_operand(ud_t * u, ud_operand_t * o, operand_info_t * opera
 					case 32: operand->offset = o->lval.sdword; break;
 				}
 			}
+		}
+		// [rip+...] case
+		if(u->dis_mode == 64 && (operand->base == UD_R_RIP || operand->index == UD_R_RIP) && (!operand->base || !operand->index) && !operand->scale) {
+			operand->offset += u->pc;
+			operand->base = UD_NONE;
+			operand->index = UD_NONE;
 		}
 		break;
 	case UD_OP_IMM:
@@ -494,11 +500,12 @@ void main() {
 	assembler_t * asmb;
 	instruction_info_t * inst;
 	asmb = assembler_create(64);
-	if (assembler_assemble(asmb, "jmp 0x545443", 0x550)) {
+	if (assembler_assemble(asmb, "lea rax, [?0x22224444]", 0x22223333ULL)) {
+	//if (assembler_assemble(asmb, "lea rax, [rip+0x1111]", 0x122223333ULL)) {
 		printf("Error");
 	}
 	inst = instruction_create(64);
-	instruction_disassemble(inst, asmb->output.buffer, asmb->output.size, 0x550);
+	instruction_disassemble(inst, asmb->output.buffer, asmb->output.size, 0x122223333ULL);
 	instruction_string(inst, instr, sizeof(instr));
 	assembler_destroy(asmb);
 	getchar();

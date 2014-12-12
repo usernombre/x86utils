@@ -1024,9 +1024,14 @@ recalc_normal_span(yasm_span *span)
                                 span->terms[i].new_val);
         yasm_expr__subst(abs_copy, span->num_terms, span->items);
         num = yasm_expr_get_intnum(&abs_copy, 0);
-        if (num)
-            span->new_val = yasm_intnum_get_int(num);
-        else
+        if (num) {
+			if (span->depval.rel) {
+				yasm_intnum * tmp = yasm_intnum_create_sized((unsigned char *)&span->bc->address, 0, 8, 0);
+				yasm_intnum_calc(num, YASM_EXPR_SUB, tmp);
+				yasm_intnum_destroy(tmp);
+			}
+			span->new_val = yasm_intnum_get_int(num);
+		} else
             span->new_val = LONG_MAX; /* too complex; force to longest form */
         yasm_expr_destroy(abs_copy);
     }
@@ -1036,8 +1041,7 @@ recalc_normal_span(yasm_span *span)
             span->new_val += span->rel_term->new_val >> span->depval.rshift;
         else
             span->new_val = LONG_MAX;   /* too complex; force to longest form */
-    } else if (span->depval.rel)
-        span->new_val = LONG_MAX;   /* too complex; force to longest form */
+    }
 
     if (span->new_val == LONG_MAX)
         span->active = 0;
@@ -1284,7 +1288,7 @@ optimize_term_expand(IntervalTreeNode *node, void *d)
 }
 
 void
-yasm_object_optimize(yasm_object *object, yasm_errwarns *errwarns)
+yasm_object_optimize(yasm_object *object, yasm_errwarns *errwarns, unsigned long long address)
 {
     yasm_section *sect;
     unsigned long bc_index = 0;
@@ -1325,6 +1329,7 @@ yasm_object_optimize(yasm_object *object, yasm_errwarns *errwarns)
         while (bc) {
             bc->bc_index = bc_index++;
             bc->offset = offset;
+			bc->address = address + offset;
 
             retval = yasm_bc_calc_len(bc, optimize_add_span, &optd);
             yasm_errwarn_propagate(errwarns, bc->line);
@@ -1367,14 +1372,25 @@ yasm_object_optimize(yasm_object *object, yasm_errwarns *errwarns)
 
     /* Step 1b */
     TAILQ_FOREACH_SAFE(span, &optd.spans, link, span_temp) {
+        unsigned long orig_len;
+        long len_diff;
+		yasm_bytecode *bc;
+
         span_create_terms(span);
         if (yasm_error_occurred()) {
             yasm_errwarn_propagate(errwarns, span->bc->line);
             saw_error = 1;
         } else if (recalc_normal_span(span)) {
+			orig_len = span->bc->len * span->bc->mult_int;
             retval = yasm_bc_expand(span->bc, span->id, span->cur_val,
                                     span->new_val, &span->neg_thres,
                                     &span->pos_thres);
+			len_diff = span->bc->len * span->bc->mult_int - orig_len;
+			if (len_diff != 0) {
+				bc = STAILQ_NEXT(span->bc, link);
+				while (bc) { bc->address += len_diff; bc = STAILQ_NEXT(bc, link); }
+			}
+
             yasm_errwarn_propagate(errwarns, span->bc->line);
             if (retval < 0)
                 saw_error = 1;
@@ -1484,6 +1500,7 @@ yasm_object_optimize(yasm_object *object, yasm_errwarns *errwarns)
     while (!STAILQ_EMPTY(&optd.QA) || !(STAILQ_EMPTY(&optd.QB))) {
         unsigned long orig_len;
         long offset_diff;
+		yasm_bytecode *bc;
 
         /* QA is for TIMES, update those first, then update non-TIMES.
          * This is so that TIMES can absorb increases before we look at
@@ -1533,6 +1550,9 @@ yasm_object_optimize(yasm_object *object, yasm_errwarns *errwarns)
         if (optd.len_diff == 0)
             continue;   /* didn't increase in size */
 
+		bc = STAILQ_NEXT(span->bc, link);
+		while (bc) { bc->address += optd.len_diff; bc = STAILQ_NEXT(bc, link); }
+
         /* Iterate over all spans dependent across the bc just expanded */
         IT_enumerate(optd.itree, (long)span->bc->bc_index,
                      (long)span->bc->bc_index, &optd, optimize_term_expand);
@@ -1561,9 +1581,13 @@ yasm_object_optimize(yasm_object *object, yasm_errwarns *errwarns)
 
             offset_diff = os->new_val + os->bc->len - old_next_offset;
             optd.len_diff = os->bc->len - orig_len;
-            if (optd.len_diff != 0)
+            if (optd.len_diff != 0) {
+				bc = STAILQ_NEXT(os->bc, link);
+				while (bc) { bc->address += optd.len_diff; bc = STAILQ_NEXT(bc, link); }
+
                 IT_enumerate(optd.itree, (long)os->bc->bc_index,
                      (long)os->bc->bc_index, &optd, optimize_term_expand);
+			}
 
             os->cur_val = os->new_val;
             os = STAILQ_NEXT(os, link);

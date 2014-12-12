@@ -204,7 +204,7 @@ int assembler_assemble(assembler_t * asmb, const char * assembly, uint64_t addre
 		goto error;
 	}
 
-    yasm_object_optimize(object, errwarns);
+    yasm_object_optimize(object, errwarns, address);
     if (yasm_errwarns_num_errors(errwarns, 1) > 0) {
 		goto error;
 	}

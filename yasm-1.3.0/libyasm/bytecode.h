@@ -214,6 +214,7 @@ struct yasm_bytecode {
      * 0-based, ~0UL (e.g. all 1 bits) if unknown.
      */
     unsigned long offset;
+    unsigned long long address;
 
     /** Unique integer index of bytecode.  Used during optimization. */
     unsigned long bc_index;

@@ -199,7 +199,7 @@ void yasm_object_set_global_suffix(yasm_object *object, const char *suffix);
  * \note Optimization failures are stored into errwarns.
  */
 YASM_LIB_DECL
-void yasm_object_optimize(yasm_object *object, yasm_errwarns *errwarns);
+void yasm_object_optimize(yasm_object *object, yasm_errwarns *errwarns, unsigned long long address);
 
 /** Determine if a section is flagged to contain code.
  * \param sect      section

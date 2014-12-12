@@ -723,15 +723,15 @@ x86_bc_jmp_calc_len(yasm_bytecode *bc, yasm_bc_add_span_func add_span,
          */
     }
 
-    if (jmp->target.rel
+    /*if (jmp->target.rel
         && (!yasm_symrec_get_label(jmp->target.rel, &target_prevbc)
-            || target_prevbc->section != bc->section)) {
+            || target_prevbc->section != bc->section)) {*/
         /* External or out of segment, so we can't check distance.
          * Allowing short jumps depends on the objfmt supporting
          * 8-bit relocs.  While most don't, some might, so allow it here.
          * Otherwise default to word-sized.
          * The objfmt will error if not supported.
-         */
+         *//*
         if (jmp->op_sel == JMP_SHORT_FORCED || jmp->nearop.len == 0) {
             if (jmp->op_sel == JMP_NONE)
                 jmp->op_sel = JMP_SHORT;
@@ -742,7 +742,7 @@ x86_bc_jmp_calc_len(yasm_bytecode *bc, yasm_bc_add_span_func add_span,
             bc->len += (opersize == 16) ? 2 : 4;
         }
         return 0;
-    }
+    }*/
 
     /* Default to short jump and generate span */
     if (jmp->op_sel == JMP_NONE)

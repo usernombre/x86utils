@@ -1411,9 +1411,20 @@ parse_expr6(yasm_parser_nasm *parser_nasm, expr_type type)
             get_next_token();
             return e;
         case INTNUM:
-            e = p_expr_new_ident(yasm_expr_int(INTNUM_val));
+			{
+			yasm_intnum * num = INTNUM_val;
+			unsigned char val[32];
+			if (!yasm_intnum_check_size(num, yasm_arch_get_address_size(parser_nasm->object->arch), 0, 0)) {
+                yasm_error_set(YASM_ERROR_SYNTAX, N_("Invalid immediate size"));
+				return NULL;
+			}
+			yasm_intnum_get_sized(num, val, sizeof(val), sizeof(val)*8, 0, 0, 0);
+			yasm_intnum_destroy(num);
+			num = yasm_intnum_create_sized(val, 1, yasm_arch_get_address_size(parser_nasm->object->arch)/8, 0);
+            e = p_expr_new_ident(yasm_expr_int(num));
             get_next_token();
             return e;
+			}
         case RELINTNUM:
 			{
 			yasm_expr__item * n = yasm_expr_int(INTNUM_val);

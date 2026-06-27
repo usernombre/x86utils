@@ -38,7 +38,7 @@ typedef struct bin_section_data {
     int bss;                    /* aka nobits */
 
     /* User-provided alignment */
-    yasm_intnum *align, *valign;
+    /*@null@*/ /*@owned@*/ yasm_intnum *align, *valign;
 
     /* User-provided starts */
     /*@null@*/ /*@owned@*/ yasm_expr *start, *vstart;
@@ -1446,6 +1446,7 @@ bin_objfmt_section_switch(yasm_object *object, yasm_valparamhead *valparams,
     yasm_valparam *vp;
     yasm_section *retval;
     int isnew;
+    int argument_error = 0;
     int flags_override = 0;
     const char *sectname;
     bin_section_data *bsd = NULL;
@@ -1459,7 +1460,7 @@ bin_objfmt_section_switch(yasm_object *object, yasm_valparamhead *valparams,
         /*@only@*/ /*@null@*/ yasm_intnum *valign;
         unsigned long bss;
         unsigned long code;
-    } data;
+    } data, tmp_data;
 
     static const yasm_dir_help help[] = {
         { "follows", 1, yasm_dir_helper_string,
@@ -1499,40 +1500,43 @@ bin_objfmt_section_switch(yasm_object *object, yasm_valparamhead *valparams,
     if (retval) {
         bsd = yasm_section_get_data(retval, &bin_section_data_cb);
         assert(bsd != NULL);
-        data.follows = bsd->follows;
-        data.vfollows = bsd->vfollows;
-        data.start = bsd->start;
-        data.vstart = bsd->vstart;
-        data.align = NULL;
-        data.valign = NULL;
-        data.bss = bsd->bss;
-        data.code = yasm_section_is_code(retval);
+        tmp_data.bss = bsd->bss;
+        tmp_data.code = yasm_section_is_code(retval);
     } else {
-        data.follows = NULL;
-        data.vfollows = NULL;
-        data.start = NULL;
-        data.vstart = NULL;
-        data.align = NULL;
-        data.valign = NULL;
-        data.bss = strcmp(sectname, ".bss") == 0;
-        data.code = strcmp(sectname, ".text") == 0;
+        tmp_data.bss = strcmp(sectname, ".bss") == 0;
+        tmp_data.code = strcmp(sectname, ".text") == 0;
     }
+    tmp_data.follows = NULL;
+    tmp_data.vfollows = NULL;
+    tmp_data.start = NULL;
+    tmp_data.vstart = NULL;
+    tmp_data.align = NULL;
+    tmp_data.valign = NULL;
 
     flags_override = yasm_dir_helper(object, vp, line, help, NELEMS(help),
-                                     &data, yasm_dir_helper_valparam_warn);
+                                     &tmp_data, yasm_dir_helper_valparam_warn);
     if (flags_override < 0)
         return NULL;    /* error occurred */
+        
+    data.follows = tmp_data.follows ? tmp_data.follows : (bsd ? bsd->follows : NULL);
+    data.vfollows = tmp_data.vfollows ? tmp_data.vfollows : (bsd ? bsd->vfollows : NULL);
+    data.start = tmp_data.start ? tmp_data.start : (bsd ? bsd->start : NULL);
+    data.vstart = tmp_data.vstart ? tmp_data.vstart : (bsd ? bsd->vstart : NULL);
+    data.align = tmp_data.align;
+    data.valign = tmp_data.valign;
+    data.bss = tmp_data.bss;
+    data.code = tmp_data.code;
 
     if (data.start && data.follows) {
         yasm_error_set(YASM_ERROR_GENERAL,
             N_("cannot combine `start' and `follows' section attributes"));
-        return NULL;
+        argument_error = 1;
     }
 
     if (data.vstart && data.vfollows) {
         yasm_error_set(YASM_ERROR_GENERAL,
             N_("cannot combine `vstart' and `vfollows' section attributes"));
-        return NULL;
+        argument_error = 1;
     }
 
     if (data.align) {
@@ -1543,7 +1547,7 @@ bin_objfmt_section_switch(yasm_object *object, yasm_valparamhead *valparams,
             yasm_error_set(YASM_ERROR_VALUE,
                            N_("argument to `%s' is not a power of two"),
                            "align");
-            return NULL;
+            argument_error = 1;
         }
     } else
         data.align = bsd ? bsd->align : NULL;
@@ -1556,10 +1560,26 @@ bin_objfmt_section_switch(yasm_object *object, yasm_valparamhead *valparams,
             yasm_error_set(YASM_ERROR_VALUE,
                            N_("argument to `%s' is not a power of two"),
                            "valign");
-            return NULL;
+            argument_error = 1;
         }
     } else
         data.valign = bsd ? bsd->valign : NULL;
+    
+    if (argument_error) {
+        if (tmp_data.align)
+            yasm_intnum_destroy(tmp_data.align);
+        if (tmp_data.valign)
+            yasm_intnum_destroy(tmp_data.valign);
+        if (tmp_data.start)
+            yasm_expr_destroy(tmp_data.start);
+        if (tmp_data.vstart)
+            yasm_expr_destroy(tmp_data.vstart);
+        if (tmp_data.follows)
+            yasm_xfree(tmp_data.follows);
+        if (tmp_data.vfollows)
+            yasm_xfree(tmp_data.vfollows);
+        return NULL;
+    }
 
     retval = yasm_object_get_general(object, sectname, 0, (int)data.code,
                                      (int)data.bss, &isnew, line);
@@ -1572,12 +1592,36 @@ bin_objfmt_section_switch(yasm_object *object, yasm_valparamhead *valparams,
 
     /* Update section flags */
     bsd->bss = data.bss;
-    bsd->align = data.align;
-    bsd->valign = data.valign;
-    bsd->start = data.start;
-    bsd->vstart = data.vstart;
-    bsd->follows = data.follows;
-    bsd->vfollows = data.vfollows;
+    if (bsd->align != data.align) {
+        if (bsd->align)
+            yasm_intnum_destroy(bsd->align);
+        bsd->align = data.align;
+    }
+    if (bsd->valign != data.valign) {
+        if (bsd->valign)
+            yasm_intnum_destroy(bsd->valign);
+        bsd->valign = data.valign;
+    }
+    if (bsd->start != data.start) {
+        if (bsd->start)
+            yasm_expr_destroy(bsd->start);
+        bsd->start = data.start;
+    }
+    if (bsd->vstart != data.vstart) {
+        if (bsd->vstart)
+            yasm_expr_destroy(bsd->vstart);
+        bsd->vstart = data.vstart;
+    }
+    if (bsd->follows != data.follows) {
+        if (bsd->follows)
+            yasm_xfree(bsd->follows);
+        bsd->follows = data.follows;
+    }
+    if (bsd->vfollows != data.vfollows) {
+        if (bsd->vfollows)
+            yasm_xfree(bsd->vfollows);
+        bsd->vfollows = data.vfollows;
+    }
 
     return retval;
 }
@@ -1680,6 +1724,10 @@ static void
 bin_section_data_destroy(void *data)
 {
     bin_section_data *bsd = (bin_section_data *)data;
+    if (bsd->align)
+        yasm_intnum_destroy(bsd->align);
+    if (bsd->valign)
+        yasm_intnum_destroy(bsd->valign);
     if (bsd->start)
         yasm_expr_destroy(bsd->start);
     if (bsd->vstart)

@@ -1341,6 +1341,10 @@ mem_section_data_destroy(void *data)
         yasm_intnum_destroy(bsd->ivstart);
     if (bsd->length)
         yasm_intnum_destroy(bsd->length);
+	if (bsd->align)
+        yasm_intnum_destroy(bsd->align);
+	if (bsd->valign)
+        yasm_intnum_destroy(bsd->valign);
     yasm_xfree(data);
 }
 

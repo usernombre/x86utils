@@ -1,6 +1,4 @@
 from libc.stdlib cimport malloc, free
-from cpython cimport array
-from array import array
 
 cdef extern from "Python.h":
     object PyString_FromStringAndSize(char *s, Py_ssize_t len)
@@ -189,6 +187,7 @@ cdef class Instruction:
             
     property operands:
         def __get__(self):
+            # TODO: Add __len__
             class Operands:
                 def __getitem__(s, i):
                     if not (0 <= i < 3):
@@ -242,7 +241,7 @@ cdef class Assembler:
         
     def assemble(self, str, address = 0, return_relocs = False):
         cdef size_t output_size
-        cdef array.array relocs
+        cdef int *relocs
         if assembler_assemble(self.assembler, str, address) != 0:
             return None
         if assembler_result(self.assembler, <unsigned char *>NULL, &output_size) != 0:    
@@ -261,11 +260,15 @@ cdef class Assembler:
                 return None
             if (output_size & 3) != 0: # Should be a multiply of 4
                 raise Exception("Invalid relocs size")
-            relocs = array.array('i')
-            array.resize(relocs, output_size >> 2)
-            if assembler_relocs(self.assembler, <unsigned char *>relocs.data.as_voidptr, &output_size) != 0:  
-                return None
-            return res, list(relocs)
+            relocs = <int *>malloc(output_size)
+            try:
+                if relocs is NULL:
+                    raise MemoryError()
+                if assembler_relocs(self.assembler, <unsigned char *>relocs, &output_size) != 0:  
+                    return None
+                return res,  [relocs[i] for i in range(output_size >> 2)]
+            finally:
+                free(relocs)
         return res
         
         

@@ -181,7 +181,7 @@ DIST_COMMON = $(srcdir)/tools/Makefile.inc \
 	$(srcdir)/modules/preprocs/cpp/Makefile.inc \
 	$(srcdir)/modules/preprocs/gas/Makefile.inc \
 	$(srcdir)/modules/preprocs/gas/tests/Makefile.inc \
-	$(srcdir)/modules/preprocs/str/Makefile.inc \a
+	$(srcdir)/modules/preprocs/str/Makefile.inc \
 	$(srcdir)/modules/dbgfmts/Makefile.inc \
 	$(srcdir)/modules/dbgfmts/codeview/Makefile.inc \
 	$(srcdir)/modules/dbgfmts/dwarf2/Makefile.inc \

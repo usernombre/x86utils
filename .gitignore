@@ -8,3 +8,7 @@ ipch
 *.vcxproj.user
 /*.suo
 /python/pyx86utils.c
+/linux/build/
+/python-cffi/build/
+*.so
+*.pyc

@@ -3,11 +3,15 @@
 #include <string.h>
 
 #include <udis86.h>
-#include <libudis86\decode.h>
-#include <libudis86\syn.h>
+#include <libudis86/decode.h>
+#include <libudis86/syn.h>
 
 #include "instruction.h"
 #include "x86utils.h"
+
+#ifndef _MSC_VER
+#define _snprintf snprintf
+#endif
 
 
 const char * opcode_string(ud_mnemonic_code_t mnemonic) {

@@ -1,15 +1,9 @@
-from distutils.util import get_platform
+import sys
+import platform
 from cffi import FFI
 
 ffi = FFI()
 
-if get_platform() == "win32":
-    folder = "Win32"
-elif get_platform() == "win-amd64":
-    folder = "x64"
-else:
-    assert False # Unsupported platform
-    
 ffi.cdef("""
 typedef struct assembler {
     ...;
@@ -797,11 +791,22 @@ void instruction_string(instruction_info_t * inst, char * output, int output_siz
 int instruction_assemble(instruction_info_t * inst, unsigned char * output_buffer, size_t * output_size, uint64_t address);
 """)
 
-extra_args = dict(
-     include_dirs=[r'..\x86utils',r'..\libyasm-2.1.2',r'..\udis86-1.7.2'],
-     library_dirs=[r'..\%s\Release' % folder],
-     libraries=['x86utils', 'modules', 'libyasm', 'libudis86']
-)
+system, architecture = (platform.system(), platform.architecture()[0])
+if system == "Windows":
+    extra_args = dict(
+         include_dirs=[r'..\x86utils',r'..\libyasm-2.1.2',r'..\udis86-1.7.2'],
+         library_dirs=[r'..\%s\Release' % ("x64" if architecture == "64bit" else "Win32")],
+         libraries=['x86utils', 'modules', 'libyasm', 'libudis86']
+    )
+elif system == "Linux":
+    extra_args = dict(
+         include_dirs=["../x86utils", "../udis86-1.7.2"],
+         library_dirs=["../linux/build/lib"],
+         libraries=['x86utils', 'yasm', 'udis86']
+    )
+else:
+    print "Unsupported system %s" % system
+    sys.exit(1)
 ffi.set_source("_pyx86utils", "#include <x86utils.h>", **extra_args)
 
 if __name__ == "__main__":

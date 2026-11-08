@@ -3,10 +3,14 @@
 #include <string.h>
 
 #include <libyasm.h>
-#include <libyasm\bitvect.h>
+#include <libyasm/bitvect.h>
 
 #include "assembler.h"
 #include "x86utils.h"
+
+#ifndef _MSC_VER
+#define _snprintf snprintf
+#endif
 
 
 static int BitVector_initialized = 0;
